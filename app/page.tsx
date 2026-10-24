@@ -13,7 +13,7 @@ export default function Home() {
           </h2>
           <audio 
             controls 
-            src="/media/for%20Revenge%20-%20Serana%20Live%20at%20RockAroma%20Jakcloth%20Reload%20Summerfest%202023.mp3" 
+            src="/media/for Revenge - Serana Live at RockAroma Jakcloth Reload Summerfest 2023.mp3" 
             className="w-full"
           />
         </div>
@@ -25,7 +25,7 @@ export default function Home() {
           </h2>
           <video 
             controls 
-            src="/media/for%20Revenge%20-%20Serana%20Live%20at%20RockAroma%20Jakcloth%20Reload%20Summerfest%202023.mp4" 
+            src="/media/for Revenge - Serana Live at RockAroma Jakcloth Reload Summerfest 2023.mp4" 
             className="w-full rounded-xl border border-zinc-700"
           />
         </div>
