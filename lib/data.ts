@@ -29,3 +29,4 @@ export const merchandise: MerchItem[] = [
     image: '/media/sakaramen kebisingan ekstrim pin merchandise.jpg'
   }
 ]
+

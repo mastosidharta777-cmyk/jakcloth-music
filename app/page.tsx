@@ -427,7 +427,14 @@ export default function Page() {
                   selectedAlbum === album.id ? 'border-red-600' : 'border-neutral-800 hover:border-neutral-700'
                 }`}
               >
-                <img src={album.cover} alt={album.name} className="w-full h-40 md:h-48 object-cover" />
+                <img
+                  src={album.cover}
+                  alt={album.name}
+                  className="w-full h-40 md:h-48 object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&auto=format&fit=crop&q=60'
+                  }}
+                />
                 <div className="p-3 bg-neutral-950">
                   <p className="text-sm font-bold text-white">{album.name}</p>
                   <p className="text-xs text-neutral-400">{album.genre}</p>
@@ -459,7 +466,14 @@ export default function Page() {
                   return (
                     <div key={album.id} className="space-y-3">
                       <div className="flex items-center gap-3 p-3 rounded-lg bg-neutral-950 border border-neutral-800">
-                        <img src={album.cover} alt={album.name} className="w-16 h-16 rounded object-cover" />
+                  <img
+                    src={album.cover}
+                    alt={album.name}
+                    className="w-16 h-16 rounded object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&auto=format&fit=crop&q=60'
+                    }}
+                  />
                         <div>
                           <p className="font-bold text-white">{album.name}</p>
                           <p className="text-xs text-neutral-400">{album.genre}</p>
@@ -511,7 +525,14 @@ export default function Page() {
             {merchandise.map((item: any) => (
               <div key={item.id} className="bg-neutral-950 border border-neutral-800 rounded-lg overflow-hidden flex flex-col">
                 <div className="relative">
-                  <img src={item.image} alt={item.name} className="w-full h-48 object-cover" />
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-full h-48 object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&auto=format&fit=crop&q=60'
+                    }}
+                  />
                   <span className="absolute top-2 left-2 text-[10px] font-bold bg-red-600 text-white px-2 py-1 rounded">{item.badge}</span>
                 </div>
                 <div className="p-3 flex-1 flex flex-col">
@@ -537,7 +558,14 @@ export default function Page() {
               const isSoldOut = item.claimed >= item.stock
               return (
                 <div key={item.id} className="bg-neutral-950 border border-neutral-800 rounded-lg p-3 flex gap-3 items-center">
-                  <img src={item.image} alt={item.title} className="w-20 h-20 object-cover rounded-md bg-neutral-900" />
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-20 h-20 object-cover rounded-md bg-neutral-900"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&auto=format&fit=crop&q=60'
+                    }}
+                  />
                   <div className="flex-1 min-w-0">
                     <span className="text-[10px] font-bold text-red-500 uppercase tracking-wider">{item.brand}</span>
                     <h4 className="font-semibold text-white text-xs truncate">{item.title}</h4>
