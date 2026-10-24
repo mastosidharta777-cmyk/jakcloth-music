@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
+import { merchandise } from '@/lib/data'
 
 interface Track {
   id: string
@@ -35,6 +36,13 @@ interface Merchandise {
 export default function Page() {
   const [loading, setLoading] = useState(true)
   const [mediaType, setMediaType] = useState<'audio' | 'video'>('video')
+  const [isLocked, setIsLocked] = useState(false)
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
+  const [isUnlockedByDemo, setIsUnlockedByDemo] = useState(false)
+  const [showQrisModal, setShowQrisModal] = useState(false)
+  const [selectedPaymentItem, setSelectedPaymentItem] = useState<{ name: string; price: string } | null>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const audioRef = useRef<HTMLAudioElement>(null)
 
   const tracks: Track[] = [
     {
@@ -47,31 +55,126 @@ export default function Page() {
       videoUrl: '/media/for Revenge - Serana Live at RockAroma Jakcloth Reload Summerfest 2023.mp4'
     },
     {
-      id: 't2',
-      title: 'Sudut Kota (Studio Rec)',
-      artist: 'The Overdue (Band Pembuka 2025)',
-      type: 'Studio (Kompilasi JakCloth)',
-      duration: '03:45',
-      audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3'
+      id: 'r1',
+      title: 'bukan tentangmu',
+      artist: 'Daun Jatuh',
+      type: 'Romantika Urban Kontemporer',
+      duration: '04:12',
+      audioUrl: '/media/Daun Jatuh - bukan tentangmu.mp3'
     },
     {
-      id: 't3',
-      title: 'Malam Tanpa Suara (Studio Rec)',
-      artist: 'Anak Senja (Band Pembuka 2025)',
-      type: 'Studio (Kompilasi JakCloth)',
-      duration: '03:10',
-      audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3'
+      id: 'r2',
+      title: 'Alive',
+      artist: 'Dear9Three',
+      type: 'Romantika Urban Kontemporer',
+      duration: '03:58',
+      audioUrl: '/media/Dear9Three - Alive.mp3'
     },
     {
-      id: 't4',
-      title: 'Berlari Kencang (Studio Rec)',
-      artist: 'Highschool Heroes',
-      type: 'Studio (Kompilasi JakCloth)',
-      duration: '02:55',
-      audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3'
+      id: 'r3',
+      title: '1,2,3',
+      artist: '1 Tengah',
+      type: 'Romantika Urban Kontemporer',
+      duration: '03:26',
+      audioUrl: '/media/1 Tengah - 1,2,3.mp3'
+    },
+    {
+      id: 'r4',
+      title: 'Benua Yang Hilang',
+      artist: 'The Lantis',
+      type: 'Romantika Urban Kontemporer',
+      duration: '04:05',
+      audioUrl: '/media/The Lantis - Benua Yang Hilang.mp3'
+    },
+    {
+      id: 'm1',
+      title: 'BAB III',
+      artist: 'The Skit',
+      type: 'Manifesto Gigs Bawah',
+      duration: '03:47',
+      audioUrl: '/media/The Skit - BAB III.mp3'
+    },
+    {
+      id: 'm2',
+      title: 'Kebelet',
+      artist: 'Sukses Lancar Rejeki',
+      type: 'Manifesto Gigs Bawah',
+      duration: '03:22',
+      audioUrl: '/media/Sukses Lancar Rejeki - Kebelet.mp3'
+    },
+    {
+      id: 'm3',
+      title: 'Lucid',
+      artist: 'CLOSEME',
+      type: 'Manifesto Gigs Bawah',
+      duration: '03:54',
+      audioUrl: '/media/CLOSEME - Lucid.mp3'
+    },
+    {
+      id: 'm4',
+      title: 'Punk!',
+      artist: 'The Sidhartas',
+      type: 'Manifesto Gigs Bawah',
+      duration: '02:58',
+      audioUrl: '/media/The Sidhartas - Punk!.mp3'
+    },
+    {
+      id: 's1',
+      title: 'Asa',
+      artist: 'Undelayed',
+      type: 'Sakramen Kebisingan Ekstrim',
+      duration: '04:01',
+      audioUrl: '/media/UNDELAYED - ASA.mp3'
+    },
+    {
+      id: 's2',
+      title: 'Paranoid',
+      artist: 'Hellfreezed',
+      type: 'Sakramen Kebisingan Ekstrim',
+      duration: '03:39',
+      audioUrl: '/media/Hellfreezed - Paranoid.mp3'
+    },
+    {
+      id: 's3',
+      title: 'Never Forever',
+      artist: 'Revenge The Fate',
+      type: 'Sakramen Kebisingan Ekstrim',
+      duration: '04:16',
+      audioUrl: '/media/Revenge The Fate - Never Forever.mp3'
+    },
+    {
+      id: 's4',
+      title: 'Carry My Regret',
+      artist: 'I Only Exist When You Remember Me',
+      type: 'Sakramen Kebisingan Ekstrim',
+      duration: '04:24',
+      audioUrl: '/media/I Only Exist When You Remember Me - Carry My Regret.mp3'
     }
   ]
+
+  const albums = [
+    {
+      id: 'romantika',
+      name: 'Romantika Urban Kontemporer',
+      genre: 'Pop Alternatif',
+      cover: '/media/Jakcloth Urban Kontemporer - Kompilasi Pop alternativ.jpeg'
+    },
+    {
+      id: 'manifesto',
+      name: 'Manifesto Gigs Bawah',
+      genre: 'Underground',
+      cover: '/media/Jakcloth - MGBT - artwork.jpg'
+    },
+    {
+      id: 'sakramen',
+      name: 'Sakramen Kebisingan Ekstrim',
+      genre: 'Hardcore/Noise',
+      cover: '/media/Jakcloth - SKE - artwork.jpg'
+    }
+  ]
+
   const [activeTrack, setActiveTrack] = useState<Track>(tracks[0])
+  const [selectedAlbum, setSelectedAlbum] = useState<string | null>(null)
 
   const [stages, setStages] = useState<Stage[]>([
     { id: '1', name: 'Main Stage', currentBand: 'For Revenge', votes: 1420 },
@@ -157,14 +260,82 @@ export default function Page() {
     await supabase.from('stages').update({ votes: newVotes }).eq('id', stageId)
   }
 
-  async function handleClaimMerch(item: Merchandise) {
+  const handleUnlockDemo = () => {
+    setIsLocked(false)
+    setIsUnlockedByDemo(true)
+    setShowPaymentModal(false)
+    setShowQrisModal(false)
+    if (mediaType === 'video' && videoRef.current) {
+      videoRef.current.play()
+    }
+    if (mediaType === 'audio' && audioRef.current) {
+      audioRef.current.play()
+    }
+  }
+
+  const handleQrisSuccess = () => {
+    setShowQrisModal(false)
+    setIsLocked(false)
+    setIsUnlockedByDemo(true)
+    if (mediaType === 'video' && videoRef.current) {
+      videoRef.current.play()
+    }
+    if (mediaType === 'audio' && audioRef.current) {
+      audioRef.current.play()
+    }
+  }
+
+  const handlePaymentSuccess = () => {
+    setShowPaymentModal(false)
+    setIsLocked(false)
+    setIsUnlockedByDemo(true)
+    if (mediaType === 'video' && videoRef.current) {
+      videoRef.current.play()
+    }
+    if (mediaType === 'audio' && audioRef.current) {
+      audioRef.current.play()
+    }
+  }
+
+  const handleClaimMerch = async (item: Merchandise) => {
     if (item.claimed >= item.stock) return
     const newClaimed = item.claimed + 1
     setMerchList((prev) =>
       prev.map((m) => (m.id === item.id ? { ...m, claimed: newClaimed } : m))
     )
     setActiveQR({ code: item.code, title: item.title, brand: item.brand })
-    await supabase.from('vouchers').update({ claimed_count: newClaimed }).eq('id', item.id)
+    try {
+      await supabase.from('vouchers').update({ claimed_count: newClaimed }).eq('id', item.id)
+    } catch {}
+  }
+
+  const handleTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement | HTMLAudioElement>) => {
+    const target = e.currentTarget
+    if (!isUnlockedByDemo && target.currentTime >= 15 && !isLocked) {
+      target.pause()
+      setIsLocked(true)
+    }
+  }
+
+  const handleBuyDigitalPass = () => {
+    setSelectedPaymentItem({ name: 'Digital Master Pass', price: 'Rp 25.000' })
+    setIsLocked(false)
+    setShowPaymentModal(false)
+    setShowQrisModal(true)
+  }
+
+  const handleBuyMerchFromPaywall = () => {
+    setSelectedPaymentItem({ name: 'Merchandise Official Bundle', price: 'Mulai Rp 75.000' })
+    setIsLocked(false)
+    setShowPaymentModal(false)
+    setShowQrisModal(true)
+  }
+
+  const handleBuyDigitalAlbum = () => {
+    setSelectedPaymentItem({ name: 'Digital Album', price: 'Rp 25.000' })
+    setIsLocked(false)
+    setShowPaymentModal(false)
+    setShowQrisModal(true)
   }
 
   if (loading) {
@@ -218,11 +389,13 @@ export default function Page() {
           <div className="bg-black flex items-center justify-center min-h-[260px]">
             {mediaType === 'video' ? (
               <video
+                ref={videoRef}
                 key={activeTrack.videoUrl || activeTrack.id}
                 controls
                 controlsList="nodownload"
                 className="w-full aspect-video rounded-b-xl"
-                poster="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&auto=format&fit=crop&q=60"
+                poster="/media/For Revenge Rockaroma Live Performance.png"
+                onTimeUpdate={handleTimeUpdate}
               >
                 <source src={activeTrack.videoUrl || "/media/for Revenge - Serana Live at RockAroma Jakcloth Reload Summerfest 2023.mp4"} type="video/mp4" />
                 Browser Anda tidak mendukung HTML5 video.
@@ -231,7 +404,7 @@ export default function Page() {
               <div className="w-full p-8 flex flex-col items-center justify-center text-center bg-neutral-950">
                 <span className="text-xs font-mono text-red-400 mb-2">High Quality Audio Stream</span>
                 <p className="font-bold text-lg text-white mb-4">{activeTrack.title} — <span className="text-neutral-400">{activeTrack.artist}</span></p>
-                <audio key={activeTrack.audioUrl} controls src={activeTrack.audioUrl} className="w-full max-w-md">
+                <audio ref={audioRef} key={activeTrack.audioUrl} controls src={activeTrack.audioUrl} className="w-full max-w-md" onTimeUpdate={handleTimeUpdate}>
                   Browser Anda tidak mendukung HTML5 audio.
                 </audio>
               </div>
@@ -241,33 +414,112 @@ export default function Page() {
 
         <section className="bg-neutral-900 border border-neutral-800 rounded-xl p-5">
           <div className="mb-4">
-            <h3 className="text-lg font-bold text-white">Katalog Album Kompilasi JakCloth</h3>
-            <p className="text-xs text-neutral-400">Pilih lagu untuk langsung diputar di Player di atas</p>
+            <h3 className="text-lg font-bold text-white">Kompilasi Album JakCloth</h3>
+            <p className="text-xs text-neutral-400">Pilih artwork album untuk melihat daftar lagu</p>
           </div>
 
-          <div className="space-y-2">
-            {tracks.map((track) => (
+          <div className="flex md:grid md:grid-cols-3 gap-4 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0">
+            {albums.map((album) => (
               <div
-                key={track.id}
-                onClick={() => {
-                  setActiveTrack(track)
-                  if (track.videoUrl) {
-                    setMediaType('video')
-                  } else {
-                    setMediaType('audio')
-                  }
-                }}
-                className={`p-3 rounded-lg border flex items-center justify-between cursor-pointer transition ${
-                  activeTrack.id === track.id ? 'bg-red-950/40 border-red-600/50' : 'bg-neutral-950 border-neutral-800 hover:border-neutral-700'
+                key={album.id}
+                onClick={() => setSelectedAlbum(album.id === selectedAlbum ? null : album.id)}
+                className={`min-w-[260px] md:min-w-0 cursor-pointer rounded-lg border overflow-hidden transition ${
+                  selectedAlbum === album.id ? 'border-red-600' : 'border-neutral-800 hover:border-neutral-700'
                 }`}
               >
-                <div>
-                  <p className="text-sm font-semibold text-white">{track.title}</p>
-                  <p className="text-xs text-neutral-400">{track.artist}</p>
+                <img src={album.cover} alt={album.name} className="w-full h-40 md:h-48 object-cover" />
+                <div className="p-3 bg-neutral-950">
+                  <p className="text-sm font-bold text-white">{album.name}</p>
+                  <p className="text-xs text-neutral-400">{album.genre}</p>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleBuyDigitalAlbum()
+                    }}
+                    className="mt-2 w-full py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded transition"
+                  >
+                    Beli Digital Album (Rp 25.000)
+                  </button>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-xs bg-neutral-800 text-neutral-300 px-2 py-0.5 rounded font-mono">{track.type}</span>
-                  <span className="text-xs text-neutral-500 font-mono">{track.duration}</span>
+              </div>
+            ))}
+          </div>
+
+          {selectedAlbum && (
+            <div className="mt-5">
+              {albums
+                .filter((album) => album.id === selectedAlbum)
+                .map((album) => {
+                  const albumTracks = tracks.filter((track) => {
+                    if (album.id === 'romantika') return track.type === 'Romantika Urban Kontemporer'
+                    if (album.id === 'manifesto') return track.type === 'Manifesto Gigs Bawah'
+                    if (album.id === 'sakramen') return track.type === 'Sakramen Kebisingan Ekstrim'
+                    return false
+                  })
+                  return (
+                    <div key={album.id} className="space-y-3">
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-neutral-950 border border-neutral-800">
+                        <img src={album.cover} alt={album.name} className="w-16 h-16 rounded object-cover" />
+                        <div>
+                          <p className="font-bold text-white">{album.name}</p>
+                          <p className="text-xs text-neutral-400">{album.genre}</p>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        {albumTracks.map((track, idx) => (
+                          <div
+                            key={track.id}
+                            onClick={() => {
+                              setIsLocked(false)
+                              if (track.audioUrl) {
+                                setActiveTrack(track)
+                                setMediaType('audio')
+                              }
+                            }}
+                            className={`p-3 rounded-lg border flex items-center justify-between transition ${
+                              track.audioUrl
+                                ? 'cursor-pointer bg-neutral-950 border-neutral-800 hover:border-neutral-700'
+                                : 'bg-neutral-950/50 border-neutral-800/50 cursor-default'
+                            } ${
+                              activeTrack.id === track.id && track.audioUrl ? 'bg-red-950/40 border-red-600/50' : ''
+                            }`}
+                          >
+                            <div>
+                              <p className="text-sm font-semibold text-white">{idx + 1}. {track.title}</p>
+                              <p className="text-xs text-neutral-400">{track.artist}</p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <span className="text-xs text-neutral-500 font-mono">{track.duration}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })}
+            </div>
+          )}
+        </section>
+
+        <section className="bg-neutral-900 border border-neutral-800 rounded-xl p-5">
+          <div className="mb-4">
+            <h3 className="text-lg font-bold text-white">Merchandise Cross-Reward Demo</h3>
+            <p className="text-xs text-emerald-400">Beli Merch = Bonus Gratis Digital Master Audio</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {merchandise.map((item: any) => (
+              <div key={item.id} className="bg-neutral-950 border border-neutral-800 rounded-lg overflow-hidden flex flex-col">
+                <div className="relative">
+                  <img src={item.image} alt={item.name} className="w-full h-48 object-cover" />
+                  <span className="absolute top-2 left-2 text-[10px] font-bold bg-red-600 text-white px-2 py-1 rounded">{item.badge}</span>
+                </div>
+                <div className="p-3 flex-1 flex flex-col">
+                  <h4 className="font-semibold text-white text-sm">{item.name}</h4>
+                  <p className="text-sm font-bold text-red-400 mt-1">{item.price}</p>
+                  <button onClick={handleBuyDigitalAlbum} className="mt-auto w-full py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded transition">
+                    Beli Merch & Unlock Audio
+                  </button>
                 </div>
               </div>
             ))}
@@ -285,11 +537,7 @@ export default function Page() {
               const isSoldOut = item.claimed >= item.stock
               return (
                 <div key={item.id} className="bg-neutral-950 border border-neutral-800 rounded-lg p-3 flex gap-3 items-center">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-20 h-20 object-cover rounded-md bg-neutral-900"
-                  />
+                  <img src={item.image} alt={item.title} className="w-20 h-20 object-cover rounded-md bg-neutral-900" />
                   <div className="flex-1 min-w-0">
                     <span className="text-[10px] font-bold text-red-500 uppercase tracking-wider">{item.brand}</span>
                     <h4 className="font-semibold text-white text-xs truncate">{item.title}</h4>
@@ -304,9 +552,7 @@ export default function Page() {
                   <button
                     onClick={() => handleClaimMerch(item)}
                     disabled={isSoldOut}
-                    className={`px-3 py-2 rounded text-xs font-bold transition whitespace-nowrap ${
-                      isSoldOut ? 'bg-neutral-800 text-neutral-500' : 'bg-red-600 hover:bg-red-700 text-white'
-                    }`}
+                    className={`px-3 py-2 rounded text-xs font-bold transition whitespace-nowrap ${isSoldOut ? 'bg-neutral-800 text-neutral-500' : 'bg-red-600 hover:bg-red-700 text-white'}`}
                   >
                     {isSoldOut ? 'Habis' : 'Klaim QR'}
                   </button>
@@ -320,21 +566,11 @@ export default function Page() {
               <span className="text-xs font-semibold text-emerald-400 mb-1">✓ Voucher Merchandise Berhasil Diklaim</span>
               <p className="text-xs text-neutral-400 font-mono mb-1">{activeQR.brand}</p>
               <p className="text-sm font-bold text-white mb-3">{activeQR.title}</p>
-              
               <div className="p-3 bg-white rounded-lg">
-                <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(activeQR.code)}`}
-                  alt="Voucher QR Code"
-                  className="w-40 h-40"
-                />
+                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(activeQR.code)}`} alt="Voucher QR Code" className="w-40 h-40" />
               </div>
               <p className="text-xs font-mono text-neutral-400 mt-3">Kode Verifikasi Kasir: <span className="text-white font-bold">{activeQR.code}</span></p>
-              <button
-                onClick={() => setActiveQR(null)}
-                className="mt-3 text-xs text-neutral-500 hover:text-white underline"
-              >
-                Tutup QR Code
-              </button>
+              <button onClick={() => setActiveQR(null)} className="mt-3 text-xs text-neutral-500 hover:text-white underline">Tutup QR Code</button>
             </div>
           )}
         </section>
@@ -373,6 +609,83 @@ export default function Page() {
           </div>
         </section>
       </main>
+
+      {showQrisModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+          <div className="bg-neutral-900 border border-neutral-700 rounded-xl max-w-md w-full p-6 shadow-2xl text-center">
+            <div className="mb-4">
+              <h3 className="text-lg font-bold text-white mb-1">Pembayaran QRIS / Mayar Demo</h3>
+              <p className="text-sm text-neutral-400">Selesaikan pembayaran untuk membuka akses penuh</p>
+            </div>
+            <div className="mb-4 p-4 bg-neutral-950 border border-neutral-800 rounded-lg">
+              <p className="text-sm font-semibold text-white">{selectedPaymentItem?.name}</p>
+              <p className="text-lg font-bold text-red-400 mt-1">{selectedPaymentItem?.price}</p>
+            </div>
+            <div className="mb-4 flex flex-col items-center">
+              <div className="p-4 bg-white rounded-lg">
+                <svg width="160" height="160" viewBox="0 0 160 160" className="w-40 h-40">
+                  <rect width="160" height="160" fill="white" />
+                  <rect x="10" y="10" width="30" height="30" fill="black" />
+                  <rect x="120" y="10" width="30" height="30" fill="black" />
+                  <rect x="10" y="120" width="30" height="30" fill="black" />
+                  <rect x="50" y="50" width="60" height="60" fill="black" />
+                </svg>
+              </div>
+              <p className="text-xs text-neutral-400 mt-3">Scan dengan E-Wallet / Mobile Banking</p>
+            </div>
+            <button
+              onClick={handleQrisSuccess}
+              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg transition"
+            >
+              Simulasi Pembayaran Berhasil
+            </button>
+          </div>
+        </div>
+      )}
+
+      {isLocked && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+          <div className="bg-neutral-900 border border-neutral-700 rounded-xl max-w-md w-full p-6 shadow-2xl">
+            <div className="mb-4">
+              <h3 className="text-lg font-bold text-white mb-1">Akses Terkunci - Pilih Opsi Pembelian</h3>
+              <p className="text-sm text-neutral-400">
+                Anda telah mendengarkan 15 detik preview. Pilih opsi untuk membuka akses penuh.
+              </p>
+            </div>
+
+            <div className="space-y-3 mb-4">
+              <div className="p-4 bg-neutral-950 border border-neutral-800 rounded-lg">
+                <p className="text-sm font-semibold text-white mb-1">Opsi 1 (Digital Pass Only)</p>
+                <p className="text-xs text-neutral-400 mb-3">Beli Digital Master Pass (Rp 25.000)</p>
+                <button
+                  onClick={handleBuyDigitalPass}
+                  className="w-full py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-lg transition"
+                >
+                  Beli Pass Digital & Unlock
+                </button>
+              </div>
+
+              <div className="p-4 bg-neutral-950 border border-emerald-700/50 rounded-lg">
+                <p className="text-sm font-semibold text-white mb-1">Opsi 2 (Merch Bundle)</p>
+                <p className="text-xs text-neutral-400 mb-3">Beli Merchandise Official (Mulai Rp 75.000)</p>
+            <button
+              onClick={handleQrisSuccess}
+              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg transition"
+            >
+              Lanjutkan Pemutaran
+            </button>
+              </div>
+            </div>
+
+            <button
+              onClick={handleUnlockDemo}
+              className="w-full py-2 bg-neutral-800 hover:bg-neutral-700 text-white text-sm rounded-lg transition"
+            >
+              Simulasi Unlock Demo (Free Access)
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
