@@ -10,6 +10,7 @@ interface Track {
   type: string
   duration: string
   audioUrl: string
+  videoUrl?: string
 }
 
 interface Stage {
@@ -34,16 +35,16 @@ interface Merchandise {
 export default function Page() {
   const [loading, setLoading] = useState(true)
   const [mediaType, setMediaType] = useState<'audio' | 'video'>('video')
-  const videoUrl = "/media/for Revenge - Serana Live at RockAroma Jakcloth Reload Summerfest 2023.mp4"
 
   const tracks: Track[] = [
     {
       id: 't1',
-      title: 'Serana (Live at RockAroma JakCloth)',
+      title: 'Serana (Live at RockAroma JakCloth 2023)',
       artist: 'For Revenge',
       type: 'Live',
       duration: '05:48',
-      audioUrl: '/media/for Revenge - Serana Live at RockAroma Jakcloth Reload Summerfest 2023.mp3'
+      audioUrl: '/media/for Revenge - Serana Live at RockAroma Jakcloth Reload Summerfest 2023.mp3',
+      videoUrl: '/media/for Revenge - Serana Live at RockAroma Jakcloth Reload Summerfest 2023.mp4'
     },
     {
       id: 't2',
@@ -195,8 +196,8 @@ export default function Page() {
         <section className="bg-neutral-900 border border-neutral-800 rounded-xl overflow-hidden">
           <div className="p-4 border-b border-neutral-800 flex justify-between items-center flex-wrap gap-2">
             <div>
-              <span className="text-xs font-semibold text-red-500 uppercase tracking-widest">Featured Live Performance</span>
-              <h2 className="text-xl font-bold">For Revenge — Serana</h2>
+              <span className="text-xs font-semibold text-red-500 uppercase tracking-widest">Featured Performance</span>
+              <h2 className="text-xl font-bold">{activeTrack.artist} — {activeTrack.title}</h2>
             </div>
             <div className="flex bg-neutral-950 p-1 rounded-lg border border-neutral-800">
               <button
@@ -217,19 +218,20 @@ export default function Page() {
           <div className="bg-black flex items-center justify-center min-h-[260px]">
             {mediaType === 'video' ? (
               <video
+                key={activeTrack.videoUrl || activeTrack.id}
                 controls
                 controlsList="nodownload"
                 className="w-full aspect-video rounded-b-xl"
                 poster="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&auto=format&fit=crop&q=60"
               >
-                <source src={videoUrl} type="video/mp4" />
+                <source src={activeTrack.videoUrl || "/media/for Revenge - Serana Live at RockAroma Jakcloth Reload Summerfest 2023.mp4"} type="video/mp4" />
                 Browser Anda tidak mendukung HTML5 video.
               </video>
             ) : (
               <div className="w-full p-8 flex flex-col items-center justify-center text-center bg-neutral-950">
                 <span className="text-xs font-mono text-red-400 mb-2">High Quality Audio Stream</span>
                 <p className="font-bold text-lg text-white mb-4">{activeTrack.title} — <span className="text-neutral-400">{activeTrack.artist}</span></p>
-                <audio controls src={activeTrack.audioUrl} className="w-full max-w-md">
+                <audio key={activeTrack.audioUrl} controls src={activeTrack.audioUrl} className="w-full max-w-md">
                   Browser Anda tidak mendukung HTML5 audio.
                 </audio>
               </div>
@@ -240,7 +242,7 @@ export default function Page() {
         <section className="bg-neutral-900 border border-neutral-800 rounded-xl p-5">
           <div className="mb-4">
             <h3 className="text-lg font-bold text-white">Katalog Album Kompilasi JakCloth</h3>
-            <p className="text-xs text-neutral-400">Pilih lagu untuk langsung diputar di Audio Player di atas</p>
+            <p className="text-xs text-neutral-400">Pilih lagu untuk langsung diputar di Player di atas</p>
           </div>
 
           <div className="space-y-2">
@@ -249,7 +251,11 @@ export default function Page() {
                 key={track.id}
                 onClick={() => {
                   setActiveTrack(track)
-                  setMediaType('audio')
+                  if (track.videoUrl) {
+                    setMediaType('video')
+                  } else {
+                    setMediaType('audio')
+                  }
                 }}
                 className={`p-3 rounded-lg border flex items-center justify-between cursor-pointer transition ${
                   activeTrack.id === track.id ? 'bg-red-950/40 border-red-600/50' : 'bg-neutral-950 border-neutral-800 hover:border-neutral-700'
