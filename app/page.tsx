@@ -35,6 +35,9 @@ export default function Page() {
   const [supportAmount, setSupportAmount] = useState(10000)
   const [followedArtists, setFollowedArtists] = useState<string[]>([])
   const [inlineTrackId, setInlineTrackId] = useState<string | null>(null)
+  const [photoPreview, setPhotoPreview] = useState<{ src: string; alt: string } | null>(null)
+  const photoReturnFocusRef = useRef<HTMLElement | null>(null)
+  const photoCloseRef = useRef<HTMLButtonElement>(null)
   const inlineAudioRef = useRef<HTMLAudioElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const audioRef = useRef<HTMLAudioElement>(null)
@@ -239,6 +242,31 @@ export default function Page() {
     // Playback is requested by tapping a track, but can be blocked by browser settings.
     void inlineAudioRef.current?.play().catch(() => {})
   }, [inlineTrackId])
+
+  const openPhotoPreview = (event: React.MouseEvent<HTMLButtonElement>, title: string) => {
+    event.stopPropagation()
+    // Show exactly the image already displayed, including its optional fallback.
+    const src = event.currentTarget.querySelector('img')?.currentSrc
+    if (!src) return
+    photoReturnFocusRef.current = event.currentTarget
+    setPhotoPreview({src, alt:title})
+  }
+
+  useEffect(() => {
+    if (!photoPreview) return
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    photoCloseRef.current?.focus()
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setPhotoPreview(null)
+    }
+    document.addEventListener('keydown', onEscape)
+    return () => {
+      document.removeEventListener('keydown', onEscape)
+      document.body.style.overflow = previousOverflow
+      photoReturnFocusRef.current?.focus()
+    }
+  }, [photoPreview])
 
   const selectCompilationTrack = (trackId: string) => {
     videoRef.current?.pause()
@@ -447,14 +475,17 @@ export default function Page() {
                   selectedAlbum === album.id ? 'border-red-600' : 'border-neutral-800 hover:border-neutral-700'
                 }`}
               >
-                <img
-                  src={album.cover}
-                  alt={album.name}
-                  className="w-full h-40 md:h-48 object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&auto=format&fit=crop&q=60'
-                  }}
-                />
+                <button type="button" onClick={(event) => openPhotoPreview(event, album.name)} aria-label={`Perbesar artwork ${album.name}`} className="relative group block w-full text-left">
+                  <img
+                    src={album.cover}
+                    alt={album.name}
+                    className="w-full h-40 md:h-48 object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&auto=format&fit=crop&q=60'
+                    }}
+                  />
+                  <span aria-hidden="true" className="absolute bottom-2 right-2 rounded bg-black/80 px-2 py-1 text-[11px] text-white">Perbesar foto</span>
+                </button>
                 <div className="p-3 bg-neutral-950">
                   <p className="text-sm font-bold text-white">{album.name}</p>
                   <p className="text-xs text-neutral-400">{album.genre}</p>
@@ -486,14 +517,16 @@ export default function Page() {
                   return (
                     <div key={album.id} className="space-y-3">
                       <div className="flex items-center gap-3 p-3 rounded-lg bg-neutral-950 border border-neutral-800">
-                  <img
-                    src={album.cover}
-                    alt={album.name}
-                    className="w-16 h-16 rounded object-cover"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&auto=format&fit=crop&q=60'
-                    }}
-                  />
+                  <button type="button" onClick={(event) => openPhotoPreview(event, album.name)} aria-label={`Perbesar artwork ${album.name}`} className="shrink-0 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-red-500">
+                    <img
+                      src={album.cover}
+                      alt={album.name}
+                      className="w-16 h-16 rounded object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&auto=format&fit=crop&q=60'
+                      }}
+                    />
+                  </button>
                         <div>
                           <p className="font-bold text-white">{album.name}</p>
                           <p className="text-xs text-neutral-400">{album.genre}</p>
@@ -559,14 +592,16 @@ export default function Page() {
             {merchandise.map((item: any) => (
               <div key={item.id} className="bg-neutral-950 border border-neutral-800 rounded-lg overflow-hidden flex flex-col">
                 <div className="relative">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-full h-48 object-cover"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&auto=format&fit=crop&q=60'
-                    }}
-                  />
+                  <button type="button" onClick={(event) => openPhotoPreview(event, item.name)} aria-label={`Perbesar foto ${item.name}`} className="block w-full text-left">
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-full h-48 object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&auto=format&fit=crop&q=60'
+                      }}
+                    />
+                  </button>
                   <span className="absolute top-2 left-2 text-[10px] font-bold bg-red-600 text-white px-2 py-1 rounded">{item.badge}</span>
                 </div>
                 <div className="p-3 flex-1 flex flex-col">
@@ -592,14 +627,16 @@ export default function Page() {
               const isSoldOut = item.claimed >= item.stock
               return (
                 <div key={item.id} className="bg-neutral-950 border border-neutral-800 rounded-lg p-3 flex gap-3 items-center">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-20 h-20 object-cover rounded-md bg-neutral-900"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&auto=format&fit=crop&q=60'
-                    }}
-                  />
+                  <button type="button" onClick={(event) => openPhotoPreview(event, item.title)} aria-label={`Perbesar foto ${item.title}`} className="shrink-0 rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-red-500">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="w-20 h-20 object-cover rounded-md bg-neutral-900"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&auto=format&fit=crop&q=60'
+                      }}
+                    />
+                  </button>
                   <div className="flex-1 min-w-0">
                     <span className="text-[10px] font-bold text-red-500 uppercase tracking-wider">{item.brand}</span>
                     <h4 className="font-semibold text-white text-xs truncate">{item.title}</h4>
@@ -653,6 +690,38 @@ export default function Page() {
           {followedArtists.length > 0 && <p className="text-xs text-neutral-400 mt-3">{followedArtists.length} artis diikuti di perangkat ini.</p>}
         </section>
       </main>
+
+      {photoPreview && (
+        <div
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-black/90 p-3 sm:p-8"
+          role="presentation"
+          onClick={() => setPhotoPreview(null)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Foto diperbesar: ${photoPreview.alt}`}
+            className="relative flex max-h-[94dvh] w-full max-w-5xl flex-col items-center gap-3 rounded-xl bg-neutral-950 p-3 sm:p-5 shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              ref={photoCloseRef}
+              type="button"
+              onClick={() => setPhotoPreview(null)}
+              aria-label="Tutup foto"
+              className="self-end rounded-lg border border-neutral-600 bg-neutral-800 px-4 py-2 text-sm font-semibold text-white hover:bg-neutral-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-red-500"
+            >
+              Tutup ×
+            </button>
+            <img
+              src={photoPreview.src}
+              alt={photoPreview.alt}
+              className="max-h-[76dvh] max-w-full rounded-md object-contain"
+            />
+            <p className="max-w-full truncate text-center text-xs text-neutral-300">{photoPreview.alt}</p>
+          </div>
+        </div>
+      )}
 
       {showQrisModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 px-4">
