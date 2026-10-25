@@ -26,3 +26,16 @@ jobs:
         run: npx tsc --noEmit
       - name: Next.js build
         run: npm run build
+      - name: Install browser test runner
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Start production server and run user-flow smoke tests
+        run: |
+          (npx next start -p 3123 > /tmp/jakcloth-next.log 2>&1 & echo $! > /tmp/jakcloth-next.pid)
+          for i in $(seq 1 45); do
+            if curl -sf http://127.0.0.1:3123/ >/dev/null; then break; fi
+            sleep 2
+          done
+          curl -f http://127.0.0.1:3123/
+          node scripts/smoke-demo.mjs
