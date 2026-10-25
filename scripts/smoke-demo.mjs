@@ -34,6 +34,18 @@ async function run() {
   assert.equal(await page.locator('#live h2').textContent().then(x => x.includes('For Revenge')), true)
   console.log('PASS compilation player opens inline; Live performer unchanged')
 
+  // There must be no mid-song 15-second modal; invitations happen after full songs.
+  await page.locator('#inline-player-r1 audio').evaluate(el => el.dispatchEvent(new Event('timeupdate', { bubbles: true })))
+  assert.equal(await page.getByRole('heading', { name: /Dukung Artis, Buka/ }).count(), 0)
+  await page.locator('#inline-player-r1 audio').evaluate(el => el.dispatchEvent(new Event('ended', { bubbles: true })))
+  await page.getByText(/Suka lagu ini\? Dukung para artis/).waitFor()
+  assert.equal(await page.getByRole('button', { name: /Dukung album.*Demo/ }).count(), 1)
+  console.log('PASS full compilation song with optional support after natural ending')
+
+  await page.locator('#live video').evaluate(el => el.dispatchEvent(new Event('ended', { bubbles: true })))
+  await page.getByText(/Terima kasih sudah menikmati satu lagu lengkap/).waitFor()
+  console.log('PASS full live demo song without interrupting playback')
+
   await page.getByRole('button', { name: /1\. bukan tentangmu.*Daun Jatuh/ }).click()
   assert.equal(await page.locator('#inline-player-r1').count(), 0)
   console.log('PASS tapping selected track closes its player')
