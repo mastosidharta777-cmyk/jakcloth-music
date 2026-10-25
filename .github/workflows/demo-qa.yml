@@ -1,0 +1,41 @@
+name: Demo build QA
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: TypeScript validation
+        run: npx tsc --noEmit
+      - name: Next.js build
+        run: npm run build
+      - name: Install browser test runner
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Start production server and run user-flow smoke tests
+        run: |
+          (npx next start -p 3123 > /tmp/jakcloth-next.log 2>&1 & echo $! > /tmp/jakcloth-next.pid)
+          for i in $(seq 1 45); do
+            if curl -sf http://127.0.0.1:3123/ >/dev/null; then break; fi
+            sleep 2
+          done
+          curl -f http://127.0.0.1:3123/
+          node scripts/smoke-demo.mjs
