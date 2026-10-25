@@ -12,9 +12,12 @@ async function run() {
   await page.getByRole('heading', { name: 'Tiket Event JakCloth' }).waitFor()
   assert.equal(await page.getByRole('button', { name: 'Tiket segera tersedia' }).isDisabled(), true)
   assert.equal(await page.getByRole('heading', { name: 'Kompilasi Album JakCloth' }).count(), 1)
-  await page.getByText(/Demo: satu lagu pertama per album tersedia dan boleh diputar penuh tanpa batas/).waitFor()
-  // Product copy must not be mistaken for an active 3-play limitation.
-  assert.equal(await page.getByText(/Pada rilis lengkap: 3 pemutaran gratis per album/).count(), 1)
+  // Product explanations belong in documentation, not on the listening screen.
+  assert.equal(await page.getByText(/Demo: satu lagu pertama per album/).count(), 0)
+  assert.equal(await page.getByText(/Pada rilis lengkap: 3 pemutaran gratis per album/).count(), 0)
+  const albumCover = page.getByRole('button', { name: 'Perbesar artwork Romantika Urban Kontemporer' }).first().locator('img')
+  assert.equal(await albumCover.evaluate(image => getComputedStyle(image).objectFit), 'contain')
+  console.log('PASS album cover fits fully and no internal demo copy')
   assert.equal(await page.getByRole('heading', { name: 'Artis Favorit' }).count(), 1)
   assert.equal(await page.getByText('Stage Crowd Voting').count(), 0)
   console.log('PASS initial mobile navigation, tickets, artist section, no voting')
@@ -33,6 +36,7 @@ async function run() {
   await daun.waitFor()
   await daun.click()
   await page.locator('#inline-player-r1 audio').waitFor()
+  assert.equal(await page.getByText(/Lagu demo gratis/).count(), 0)
   assert.equal(await page.getByText('Audio menyusul').count() >= 3, true)
   assert.equal(await page.locator('#live h2').textContent().then(x => x.includes('For Revenge')), true)
   console.log('PASS compilation player opens inline; Live performer unchanged')
