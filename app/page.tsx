@@ -410,7 +410,8 @@ export default function Page() {
         <section id="music" className="bg-neutral-900 border border-neutral-800 rounded-xl p-5 scroll-mt-24">
           <div className="mb-4">
             <h3 className="text-lg font-bold text-white">Kompilasi Album JakCloth</h3>
-            <p className="text-xs text-neutral-400">Pilih artwork album untuk melihat daftar lagu</p>
+            <p className="text-xs text-neutral-400">Pilih nama album untuk melihat lagu. Ketuk gambar untuk memperbesar artwork.</p>
+            <p className="mt-2 text-xs text-neutral-500">Demo: satu lagu pertama per album tersedia dan boleh diputar penuh tanpa batas. Pada rilis lengkap: 3 pemutaran gratis per album, bebas pilih lagu, lalu tawaran akses penuh.</p>
           </div>
 
           <div className="flex md:grid md:grid-cols-3 gap-4 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0">
