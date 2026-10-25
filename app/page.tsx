@@ -27,9 +27,8 @@ interface Merchandise {
 
 export default function Page() {
   const [mediaType, setMediaType] = useState<'audio' | 'video'>('video')
-  const [isLocked, setIsLocked] = useState(false)
-  const [showPaymentModal, setShowPaymentModal] = useState(false)
-  const [isUnlockedByDemo, setIsUnlockedByDemo] = useState(false)
+  const [livePreviewFinished, setLivePreviewFinished] = useState(false)
+  const [finishedCompilationTrack, setFinishedCompilationTrack] = useState<string | null>(null)
   const [showQrisModal, setShowQrisModal] = useState(false)
   const [selectedPaymentItem, setSelectedPaymentItem] = useState<{ name: string; price: string; flexible?: boolean } | null>(null)
   const [supportAmount, setSupportAmount] = useState(10000)
@@ -272,7 +271,7 @@ export default function Page() {
     videoRef.current?.pause()
     audioRef.current?.pause()
     inlineAudioRef.current?.pause()
-    setIsLocked(false)
+    setFinishedCompilationTrack(null)
     setInlineTrackId(previous => previous === trackId ? null : trackId)
   }
 
@@ -284,38 +283,9 @@ export default function Page() {
     })
   }
 
-  const handleUnlockDemo = () => {
-    setIsLocked(false)
-    setIsUnlockedByDemo(true)
-    setShowPaymentModal(false)
-    setShowQrisModal(false)
-    if (inlineTrackId) {
-      void inlineAudioRef.current?.play().catch(() => {})
-    } else if (mediaType === 'video' && videoRef.current) {
-      void videoRef.current.play().catch(() => {})
-    } else if (mediaType === 'audio' && audioRef.current) {
-      void audioRef.current.play().catch(() => {})
-    }
-  }
-
   const handleQrisSuccess = () => {
     if (selectedPaymentItem?.flexible && (!Number.isSafeInteger(supportAmount) || supportAmount < 10000 || supportAmount > 10000000)) return
     setShowQrisModal(false)
-    setIsLocked(false)
-    setIsUnlockedByDemo(true)
-    if (inlineTrackId) {
-      void inlineAudioRef.current?.play().catch(() => {})
-    } else if (mediaType === 'video' && videoRef.current) {
-      void videoRef.current.play().catch(() => {})
-    } else if (mediaType === 'audio' && audioRef.current) {
-      void audioRef.current.play().catch(() => {})
-    }
-  }
-
-  const handlePaymentSuccess = () => {
-    setShowPaymentModal(false)
-    setIsLocked(false)
-    setIsUnlockedByDemo(true)
     if (inlineTrackId) {
       void inlineAudioRef.current?.play().catch(() => {})
     } else if (mediaType === 'video' && videoRef.current) {
@@ -335,34 +305,15 @@ export default function Page() {
     // Demo only. No database write or real inventory reservation.
   }
 
-  const handleTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement | HTMLAudioElement>) => {
-    const target = e.currentTarget
-    // Demo has one live song; production full concert will permit 2–3 complete free songs.
-    if (!isUnlockedByDemo && target.currentTime >= 15 && !isLocked) {
-      target.pause()
-      setIsLocked(true)
-    }
-  }
-
   const handleBuyDigitalPass = () => {
     setSupportAmount(10000)
     setSelectedPaymentItem({name: 'Live at JakCloth — '+activeTrack.artist, price:'Mulai Rp10.000',flexible:true})
-    setIsLocked(false)
-    setShowPaymentModal(false)
-    setShowQrisModal(true)
-  }
-
-  const handleBuyMerchFromPaywall = () => {
-    setSelectedPaymentItem({name:'Merchandise Official Bundle',price:'Harga sesuai produk'})
-    setIsLocked(false)
     setShowQrisModal(true)
   }
 
   const handleBuyDigitalAlbum = (name = 'Kompilasi JakCloth') => {
     setSupportAmount(10000)
     setSelectedPaymentItem({name,price:'Mulai Rp10.000',flexible:true})
-    setIsLocked(false)
-    setShowPaymentModal(false)
     setShowQrisModal(true)
   }
 
@@ -428,10 +379,11 @@ export default function Page() {
                 onPlay={() => {
                   inlineAudioRef.current?.pause()
                   setInlineTrackId(null)
+                  setLivePreviewFinished(false)
                 }}
+                onEnded={() => setLivePreviewFinished(true)}
                 className="w-full aspect-video rounded-b-xl"
                 poster="/media/For Revenge Rockaroma Live Performance.png"
-                onTimeUpdate={handleTimeUpdate}
               >
                 <source src={activeTrack.videoUrl} type="video/mp4" />
                 Browser Anda tidak mendukung HTML5 video.
@@ -443,14 +395,14 @@ export default function Page() {
                 <audio ref={audioRef} key={activeTrack.audioUrl} controls src={activeTrack.audioUrl} className="w-full max-w-md" onPlay={() => {
                   inlineAudioRef.current?.pause()
                   setInlineTrackId(null)
-                }} onTimeUpdate={handleTimeUpdate}>
+                }} onEnded={() => setLivePreviewFinished(true)}>
                   Browser Anda tidak mendukung HTML5 audio.
                 </audio>
               </div>
             )}
           </div>
           <div className="p-4 border-t border-neutral-800 flex flex-wrap gap-3 items-center justify-between">
-            <p className="text-xs text-neutral-400">Demo 1 lagu; versi konser lengkap menampilkan beberapa lagu gratis.</p>
+            <p className="text-xs text-neutral-400">{livePreviewFinished ? 'Terima kasih sudah menikmati satu lagu lengkap. Dukung artis jika ingin membantu karya dan rekaman berikutnya.' : 'Satu lagu live bisa dinikmati penuh secara gratis. Nantinya, konser lengkap menawarkan beberapa lagu gratis sebelum akses penuh.'}</p>
             <button type="button" onClick={handleBuyDigitalPass} className="rounded bg-red-600 px-3 py-2 text-sm text-white font-semibold">Dukung artis · Mulai Rp10.000</button>
           </div>
         </section>
@@ -468,7 +420,7 @@ export default function Page() {
                 onClick={() => {
                   inlineAudioRef.current?.pause()
                   setInlineTrackId(null)
-                  setIsLocked(false)
+                  setFinishedCompilationTrack(null)
                   setSelectedAlbum(album.id === selectedAlbum ? null : album.id)
                 }}
                 className={`min-w-[260px] md:min-w-0 cursor-pointer rounded-lg border overflow-hidden transition ${
@@ -554,21 +506,28 @@ export default function Page() {
                               </button>
                               {expanded && (
                                 <div id={`inline-player-${track.id}`} className="px-3 pb-3">
-                                  <p className="mb-2 text-xs text-red-300">Pratinjau audio · Demo 15 detik</p>
+                                  <p className="mb-2 text-xs text-emerald-300">Lagu demo gratis · Bisa didengarkan sampai selesai</p>
                                   <audio
                                     ref={inlineAudioRef}
                                     src={track.audioUrl}
                                     controls
                                     preload="metadata"
-                                    onTimeUpdate={handleTimeUpdate}
                                     onPlay={() => {
+                                      setFinishedCompilationTrack(null)
                                       videoRef.current?.pause()
                                       audioRef.current?.pause()
                                     }}
+                                    onEnded={() => setFinishedCompilationTrack(track.id)}
                                     className="w-full"
                                   >
                                     Browser Anda tidak mendukung pemutar audio.
                                   </audio>
+                                  {finishedCompilationTrack === track.id && (
+                                    <div role="status" className="mt-3 rounded-lg border border-neutral-700 bg-neutral-950 p-3 text-sm">
+                                      <p className="text-neutral-300">Suka lagu ini? Dukung para artis di album {album.name}.</p>
+                                      <button type="button" onClick={() => handleBuyDigitalAlbum(album.name)} className="mt-2 rounded bg-red-600 px-3 py-2 text-xs font-semibold text-white hover:bg-red-700">Dukung album · Mulai Rp10.000 (Demo)</button>
+                                    </div>
+                                  )}
                                 </div>
                               )}
                             </div>
@@ -759,49 +718,6 @@ export default function Page() {
         </div>
       )}
 
-      {isLocked && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 px-4">
-          <div className="bg-neutral-900 border border-neutral-700 rounded-xl max-w-md w-full p-6 shadow-2xl">
-            <div className="mb-4">
-              <h3 className="text-lg font-bold text-white mb-1">{inlineTrackId ? 'Dukung Artis, Buka Album Lengkap' : 'Dukung Artis, Buka Rekaman Lengkap'}</h3>
-              <p className="text-sm text-neutral-400">
-                Preview demo 15 detik. Versi konser lengkap akan memperdengarkan beberapa lagu utuh sebelum menawarkan akses penuh.
-              </p>
-            </div>
-
-            <div className="space-y-3 mb-4">
-              <div className="p-4 bg-neutral-950 border border-neutral-800 rounded-lg">
-                <p className="text-sm font-semibold text-white mb-1">{inlineTrackId ? 'Dukung Album Kompilasi' : 'Dukung Rekaman Live'}</p>
-                <p className="text-xs text-neutral-400 mb-3">Pay What You Want · Minimum Rp10.000</p>
-                <button
-                  onClick={() => inlineTrackId ? handleBuyDigitalAlbum(albums.find(album => album.id === selectedAlbum)?.name || 'Kompilasi JakCloth') : handleBuyDigitalPass()}
-                  className="w-full py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-lg transition"
-                >
-                  Pilih Nominal Dukungan
-                </button>
-              </div>
-
-              <div className="p-4 bg-neutral-950 border border-emerald-700/50 rounded-lg">
-                <p className="text-sm font-semibold text-white mb-1">Opsi 2 (Merch Bundle)</p>
-                <p className="text-xs text-neutral-400 mb-3">Beli Merchandise Official (Mulai Rp 75.000)</p>
-            <button
-              onClick={handleBuyMerchFromPaywall}
-              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg transition"
-            >
-              Lihat Simulasi Paket Merch
-            </button>
-              </div>
-            </div>
-
-            <button
-              onClick={handleUnlockDemo}
-              className="w-full py-2 bg-neutral-800 hover:bg-neutral-700 text-white text-sm rounded-lg transition"
-            >
-              Lewati Pembayaran (Hanya Demo)
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
