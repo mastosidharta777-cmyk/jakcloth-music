@@ -14,7 +14,7 @@ Prototype resmi untuk diskusi produk: pengalaman festival JakCloth yang menghubu
 
 ## Batasan demo dan pekerjaan sebelum peluncuran
 
-- Rekaman For Revenge yang ada adalah **satu lagu**, belum dokumentasi satu pertunjukan 30+ menit. Batas preview 15 detik hanya untuk memperagakan paywall; rencana produk adalah **2–3 lagu penuh gratis** sebelum akses konser lengkap.
+- Rekaman For Revenge yang ada adalah **satu lagu**, belum dokumentasi satu pertunjukan 30+ menit. Saat demo, video/audio live ini serta lagu pertama dari setiap kompilasi dapat diputar sampai selesai secara gratis. **Tidak ada paywall otomatis di detik ke-15.** Setelah sebuah lagu selesai, ajakan dukungan muncul tanpa memblokir pemutar. Untuk konser lengkap nantinya, rencana awal adalah **2–3 lagu utuh gratis**, lalu menawarkan akses konser tersisa pada **batas antar-lagu**, bukan di tengah lagu. Durasi/penempatan batas gratis perlu diuji terhadap penonton nyata.
 - Jangan memperlakukan pembayaran simulasi sebagai pembayaran resmi; saat produksi dibutuhkan webhook terverifikasi, idempotensi transaksi, dan pemberian akses **berdasarkan album atau konser yang dibeli**.
 - Aset audio/video yang berada di `public/media` adalah **publik** dan tidak dapat dipakai sebagai konten berbayar yang terlindungi. Pindahkan master penuh ke penyimpanan privat dan gunakan akses terbatas/signed URLs untuk produksi.
 - Tidak semua referensi trek dalam katalog demo memiliki file audio di repository; pemeriksaan aset dibutuhkan.
