@@ -349,7 +349,7 @@ export default function Page() {
         <section id="live" className="bg-neutral-900 border border-neutral-800 rounded-xl overflow-hidden scroll-mt-24">
           <div className="p-4 border-b border-neutral-800 flex justify-between items-center flex-wrap gap-2">
             <div>
-              <span className="text-xs font-semibold text-red-500 uppercase tracking-widest">Live at JakCloth · Demo</span>
+              <span className="text-xs font-semibold text-red-500 uppercase tracking-widest">Live at JakCloth</span>
               <h2 className="text-xl font-bold">{activeTrack.artist} — {activeTrack.title}</h2>
             </div>
             <div className="flex bg-neutral-950 p-1 rounded-lg border border-neutral-800">
@@ -402,7 +402,7 @@ export default function Page() {
             )}
           </div>
           <div className="p-4 border-t border-neutral-800 flex flex-wrap gap-3 items-center justify-between">
-            <p className="text-xs text-neutral-400">{livePreviewFinished ? 'Terima kasih sudah menikmati satu lagu lengkap. Dukung artis jika ingin membantu karya dan rekaman berikutnya.' : 'Satu lagu live bisa dinikmati penuh secara gratis. Nantinya, konser lengkap menawarkan beberapa lagu gratis sebelum akses penuh.'}</p>
+            <p className="text-xs text-neutral-400">{livePreviewFinished ? 'Terima kasih sudah menikmati satu lagu lengkap. Dukung artis jika ingin membantu karya dan rekaman berikutnya.' : 'Nikmati penampilan live ini secara utuh.'}</p>
             <button type="button" onClick={handleBuyDigitalPass} className="rounded bg-red-600 px-3 py-2 text-sm text-white font-semibold">Dukung artis · Mulai Rp10.000</button>
           </div>
         </section>
@@ -411,7 +411,6 @@ export default function Page() {
           <div className="mb-4">
             <h3 className="text-lg font-bold text-white">Kompilasi Album JakCloth</h3>
             <p className="text-xs text-neutral-400">Pilih nama album untuk melihat lagu. Ketuk gambar untuk memperbesar artwork.</p>
-            <p className="mt-2 text-xs text-neutral-500">Demo: satu lagu pertama per album tersedia dan boleh diputar penuh tanpa batas. Pada rilis lengkap: 3 pemutaran gratis per album, bebas pilih lagu, lalu tawaran akses penuh.</p>
           </div>
 
           <div className="flex md:grid md:grid-cols-3 gap-4 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0">
@@ -432,7 +431,7 @@ export default function Page() {
                   <img
                     src={album.cover}
                     alt={album.name}
-                    className="w-full h-40 md:h-48 object-cover"
+                    className="w-full aspect-square object-contain bg-neutral-950"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&auto=format&fit=crop&q=60'
                     }}
@@ -474,7 +473,7 @@ export default function Page() {
                     <img
                       src={album.cover}
                       alt={album.name}
-                      className="w-16 h-16 rounded object-cover"
+                      className="w-16 h-16 rounded object-contain bg-neutral-950"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&auto=format&fit=crop&q=60'
                       }}
@@ -507,7 +506,6 @@ export default function Page() {
                               </button>
                               {expanded && (
                                 <div id={`inline-player-${track.id}`} className="px-3 pb-3">
-                                  <p className="mb-2 text-xs text-emerald-300">Lagu demo gratis · Bisa didengarkan sampai selesai</p>
                                   <audio
                                     ref={inlineAudioRef}
                                     src={track.audioUrl}
