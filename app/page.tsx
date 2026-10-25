@@ -34,6 +34,8 @@ export default function Page() {
   const [selectedPaymentItem, setSelectedPaymentItem] = useState<{ name: string; price: string; flexible?: boolean } | null>(null)
   const [supportAmount, setSupportAmount] = useState(10000)
   const [followedArtists, setFollowedArtists] = useState<string[]>([])
+  const [inlineTrackId, setInlineTrackId] = useState<string | null>(null)
+  const inlineAudioRef = useRef<HTMLAudioElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const audioRef = useRef<HTMLAudioElement>(null)
 
@@ -232,6 +234,20 @@ export default function Page() {
     } catch {}
   }, [])
 
+  useEffect(() => {
+    if (!inlineTrackId) return
+    // Playback is requested by tapping a track, but can be blocked by browser settings.
+    void inlineAudioRef.current?.play().catch(() => {})
+  }, [inlineTrackId])
+
+  const selectCompilationTrack = (trackId: string) => {
+    videoRef.current?.pause()
+    audioRef.current?.pause()
+    inlineAudioRef.current?.pause()
+    setIsLocked(false)
+    setInlineTrackId(previous => previous === trackId ? null : trackId)
+  }
+
   function toggleFollow(artist: string) {
     setFollowedArtists((previous) => {
       const next = previous.includes(artist) ? previous.filter((name) => name !== artist) : [...previous, artist]
@@ -245,11 +261,12 @@ export default function Page() {
     setIsUnlockedByDemo(true)
     setShowPaymentModal(false)
     setShowQrisModal(false)
-    if (mediaType === 'video' && videoRef.current) {
-      videoRef.current.play()
-    }
-    if (mediaType === 'audio' && audioRef.current) {
-      audioRef.current.play()
+    if (inlineTrackId) {
+      void inlineAudioRef.current?.play().catch(() => {})
+    } else if (mediaType === 'video' && videoRef.current) {
+      void videoRef.current.play().catch(() => {})
+    } else if (mediaType === 'audio' && audioRef.current) {
+      void audioRef.current.play().catch(() => {})
     }
   }
 
@@ -258,11 +275,12 @@ export default function Page() {
     setShowQrisModal(false)
     setIsLocked(false)
     setIsUnlockedByDemo(true)
-    if (mediaType === 'video' && videoRef.current) {
-      videoRef.current.play()
-    }
-    if (mediaType === 'audio' && audioRef.current) {
-      audioRef.current.play()
+    if (inlineTrackId) {
+      void inlineAudioRef.current?.play().catch(() => {})
+    } else if (mediaType === 'video' && videoRef.current) {
+      void videoRef.current.play().catch(() => {})
+    } else if (mediaType === 'audio' && audioRef.current) {
+      void audioRef.current.play().catch(() => {})
     }
   }
 
@@ -270,11 +288,12 @@ export default function Page() {
     setShowPaymentModal(false)
     setIsLocked(false)
     setIsUnlockedByDemo(true)
-    if (mediaType === 'video' && videoRef.current) {
-      videoRef.current.play()
-    }
-    if (mediaType === 'audio' && audioRef.current) {
-      audioRef.current.play()
+    if (inlineTrackId) {
+      void inlineAudioRef.current?.play().catch(() => {})
+    } else if (mediaType === 'video' && videoRef.current) {
+      void videoRef.current.play().catch(() => {})
+    } else if (mediaType === 'audio' && audioRef.current) {
+      void audioRef.current.play().catch(() => {})
     }
   }
 
@@ -378,6 +397,7 @@ export default function Page() {
                 key={activeTrack.videoUrl || activeTrack.id}
                 controls
                 controlsList="nodownload"
+                onPlay={() => inlineAudioRef.current?.pause()}
                 className="w-full aspect-video rounded-b-xl"
                 poster="/media/For Revenge Rockaroma Live Performance.png"
                 onTimeUpdate={handleTimeUpdate}
@@ -389,7 +409,7 @@ export default function Page() {
               <div className="w-full p-8 flex flex-col items-center justify-center text-center bg-neutral-950">
                 <span className="text-xs font-mono text-red-400 mb-2">High Quality Audio Stream</span>
                 <p className="font-bold text-lg text-white mb-4">{activeTrack.title} — <span className="text-neutral-400">{activeTrack.artist}</span></p>
-                <audio ref={audioRef} key={activeTrack.audioUrl} controls src={activeTrack.audioUrl} className="w-full max-w-md" onTimeUpdate={handleTimeUpdate}>
+                <audio ref={audioRef} key={activeTrack.audioUrl} controls src={activeTrack.audioUrl} className="w-full max-w-md" onPlay={() => inlineAudioRef.current?.pause()} onTimeUpdate={handleTimeUpdate}>
                   Browser Anda tidak mendukung HTML5 audio.
                 </audio>
               </div>
@@ -411,7 +431,12 @@ export default function Page() {
             {albums.map((album) => (
               <div
                 key={album.id}
-                onClick={() => setSelectedAlbum(album.id === selectedAlbum ? null : album.id)}
+                onClick={() => {
+                  inlineAudioRef.current?.pause()
+                  setInlineTrackId(null)
+                  setIsLocked(false)
+                  setSelectedAlbum(album.id === selectedAlbum ? null : album.id)
+                }}
                 className={`min-w-[260px] md:min-w-0 cursor-pointer rounded-lg border overflow-hidden transition ${
                   selectedAlbum === album.id ? 'border-red-600' : 'border-neutral-800 hover:border-neutral-700'
                 }`}
@@ -469,33 +494,47 @@ export default function Page() {
                         </div>
                       </div>
                       <div className="space-y-2">
-                        {albumTracks.map((track, idx) => (
-                          <div
-                            key={track.id}
-                            onClick={() => {
-                              setIsLocked(false)
-                              if (availableAudioPaths.has(track.audioUrl)) {
-                                setActiveTrack(track)
-                                setMediaType('audio')
-                              }
-                            }}
-                            className={`p-3 rounded-lg border flex items-center justify-between transition ${
-                              availableAudioPaths.has(track.audioUrl)
-                                ? 'cursor-pointer bg-neutral-950 border-neutral-800 hover:border-neutral-700'
-                                : 'bg-neutral-950/50 border-neutral-800/50 cursor-default'
-                            } ${
-                              activeTrack.id === track.id && availableAudioPaths.has(track.audioUrl) ? 'bg-red-950/40 border-red-600/50' : ''
-                            }`}
-                          >
-                            <div>
-                              <p className="text-sm font-semibold text-white">{idx + 1}. {track.title}</p>
-                              <p className="text-xs text-neutral-400">{track.artist}</p>
+                        {albumTracks.map((track, idx) => {
+                          const playable = availableAudioPaths.has(track.audioUrl)
+                          const expanded = inlineTrackId === track.id && playable
+                          return (
+                            <div key={track.id} className={`rounded-lg border overflow-hidden ${expanded ? 'border-red-600/50 bg-red-950/20' : 'border-neutral-800 bg-neutral-950'}`}>
+                              <button
+                                type="button"
+                                disabled={!playable}
+                                aria-expanded={expanded}
+                                aria-controls={playable ? `inline-player-${track.id}` : undefined}
+                                onClick={() => selectCompilationTrack(track.id)}
+                                className="w-full p-3 text-left flex items-center justify-between gap-3 disabled:opacity-60 disabled:cursor-not-allowed hover:bg-neutral-900/70 transition"
+                              >
+                                <span className="min-w-0">
+                                  <span className="block text-sm font-semibold text-white">{idx + 1}. {track.title}</span>
+                                  <span className="block text-xs text-neutral-400">{track.artist}</span>
+                                </span>
+                                <span className="shrink-0 text-xs text-neutral-500 font-mono">{playable ? (expanded ? 'Tutup player' : track.duration) : 'Audio menyusul'}</span>
+                              </button>
+                              {expanded && (
+                                <div id={`inline-player-${track.id}`} className="px-3 pb-3">
+                                  <p className="mb-2 text-xs text-red-300">Pratinjau audio · Demo 15 detik</p>
+                                  <audio
+                                    ref={inlineAudioRef}
+                                    src={track.audioUrl}
+                                    controls
+                                    preload="metadata"
+                                    onTimeUpdate={handleTimeUpdate}
+                                    onPlay={() => {
+                                      videoRef.current?.pause()
+                                      audioRef.current?.pause()
+                                    }}
+                                    className="w-full"
+                                  >
+                                    Browser Anda tidak mendukung pemutar audio.
+                                  </audio>
+                                </div>
+                              )}
                             </div>
-                            <div className="flex items-center gap-3">
-                              <span className="text-xs text-neutral-500 font-mono">{availableAudioPaths.has(track.audioUrl) ? track.duration : 'Audio menyusul'}</span>
-                            </div>
-                          </div>
-                        ))}
+                          )
+                        })}
                       </div>
                     </div>
                   )
@@ -649,7 +688,7 @@ export default function Page() {
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 px-4">
           <div className="bg-neutral-900 border border-neutral-700 rounded-xl max-w-md w-full p-6 shadow-2xl">
             <div className="mb-4">
-              <h3 className="text-lg font-bold text-white mb-1">Dukung Artis, Buka Rekaman Lengkap</h3>
+              <h3 className="text-lg font-bold text-white mb-1">{inlineTrackId ? 'Dukung Artis, Buka Album Lengkap' : 'Dukung Artis, Buka Rekaman Lengkap'}</h3>
               <p className="text-sm text-neutral-400">
                 Preview demo 15 detik. Versi konser lengkap akan memperdengarkan beberapa lagu utuh sebelum menawarkan akses penuh.
               </p>
@@ -660,7 +699,7 @@ export default function Page() {
                 <p className="text-sm font-semibold text-white mb-1">Dukung Rekaman Live</p>
                 <p className="text-xs text-neutral-400 mb-3">Pay What You Want · Minimum Rp10.000</p>
                 <button
-                  onClick={handleBuyDigitalPass}
+                  onClick={() => inlineTrackId ? handleBuyDigitalAlbum(albums.find(album => album.id === selectedAlbum)?.name || 'Kompilasi JakCloth') : handleBuyDigitalPass()}
                   className="w-full py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-lg transition"
                 >
                   Pilih Nominal Dukungan
