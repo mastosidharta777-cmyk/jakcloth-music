@@ -145,6 +145,14 @@ export default function Page() {
     }
   ]
 
+  // Only the following audio files exist in public/media for this demo.
+  const availableAudioPaths = new Set([
+    '/media/Daun Jatuh - bukan tentangmu.mp3',
+    '/media/The Skit - BAB III.mp3',
+    '/media/UNDELAYED - ASA.mp3',
+    '/media/for Revenge - Serana Live at RockAroma Jakcloth Reload Summerfest 2023.mp3'
+  ])
+
   const albums = [
     {
       id: 'romantika',
@@ -277,9 +285,7 @@ export default function Page() {
       prev.map((m) => (m.id === item.id ? { ...m, claimed: newClaimed } : m))
     )
     setActiveQR({ code: item.code, title: item.title, brand: item.brand })
-    try {
-      // Demo only. No database write or real inventory reservation.
-    } catch {}
+    // Demo only. No database write or real inventory reservation.
   }
 
   const handleTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement | HTMLAudioElement>) => {
@@ -350,7 +356,8 @@ export default function Page() {
             </div>
             <div className="flex bg-neutral-950 p-1 rounded-lg border border-neutral-800">
               <button
-                onClick={() => setMediaType('video')}
+                onClick={() => activeTrack.videoUrl && setMediaType('video')}
+                disabled={!activeTrack.videoUrl}
                 className={`px-3 py-1 text-xs font-semibold rounded-md transition ${mediaType === 'video' ? 'bg-red-600 text-white' : 'text-neutral-400'}`}
               >
                 Video Stream
@@ -365,7 +372,7 @@ export default function Page() {
           </div>
 
           <div className="bg-black flex items-center justify-center min-h-[260px]">
-            {mediaType === 'video' ? (
+            {mediaType === 'video' && activeTrack.videoUrl ? (
               <video
                 ref={videoRef}
                 key={activeTrack.videoUrl || activeTrack.id}
@@ -375,7 +382,7 @@ export default function Page() {
                 poster="/media/For Revenge Rockaroma Live Performance.png"
                 onTimeUpdate={handleTimeUpdate}
               >
-                <source src={activeTrack.videoUrl || "/media/for Revenge - Serana Live at RockAroma Jakcloth Reload Summerfest 2023.mp4"} type="video/mp4" />
+                <source src={activeTrack.videoUrl} type="video/mp4" />
                 Browser Anda tidak mendukung HTML5 video.
               </video>
             ) : (
@@ -467,17 +474,17 @@ export default function Page() {
                             key={track.id}
                             onClick={() => {
                               setIsLocked(false)
-                              if (track.audioUrl) {
+                              if (availableAudioPaths.has(track.audioUrl)) {
                                 setActiveTrack(track)
                                 setMediaType('audio')
                               }
                             }}
                             className={`p-3 rounded-lg border flex items-center justify-between transition ${
-                              track.audioUrl
+                              availableAudioPaths.has(track.audioUrl)
                                 ? 'cursor-pointer bg-neutral-950 border-neutral-800 hover:border-neutral-700'
                                 : 'bg-neutral-950/50 border-neutral-800/50 cursor-default'
                             } ${
-                              activeTrack.id === track.id && track.audioUrl ? 'bg-red-950/40 border-red-600/50' : ''
+                              activeTrack.id === track.id && availableAudioPaths.has(track.audioUrl) ? 'bg-red-950/40 border-red-600/50' : ''
                             }`}
                           >
                             <div>
@@ -485,7 +492,7 @@ export default function Page() {
                               <p className="text-xs text-neutral-400">{track.artist}</p>
                             </div>
                             <div className="flex items-center gap-3">
-                              <span className="text-xs text-neutral-500 font-mono">{track.duration}</span>
+                              <span className="text-xs text-neutral-500 font-mono">{availableAudioPaths.has(track.audioUrl) ? track.duration : 'Audio menyusul'}</span>
                             </div>
                           </div>
                         ))}
@@ -664,7 +671,7 @@ export default function Page() {
                 <p className="text-sm font-semibold text-white mb-1">Opsi 2 (Merch Bundle)</p>
                 <p className="text-xs text-neutral-400 mb-3">Beli Merchandise Official (Mulai Rp 75.000)</p>
             <button
-              onClick={handleQrisSuccess}
+              onClick={handleBuyMerchFromPaywall}
               className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg transition"
             >
               Lihat Simulasi Paket Merch
