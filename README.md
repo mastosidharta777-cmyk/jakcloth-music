@@ -12,6 +12,10 @@ Prototype resmi untuk diskusi produk: pengalaman festival JakCloth yang menghubu
 6. Tombol **Events & Tickets** untuk saat ini adalah placeholder; belum menerima pembayaran dan tidak menerbitkan e-ticket.
 7. Merchandise, voucher dan kode QR pada demo adalah prototipe; tidak merepresentasikan produk atau voucher yang sudah aktif.
 
+## Aturan preview yang sudah disepakati
+
+Spesifikasi untuk rilis penuh: [Preview 3 pemutaran per album, soft selling, dan paywall live](docs/preview-paywall-policy.md). **Belum diterapkan sebagai pembatasan di demo.**
+
 ## Batasan demo dan pekerjaan sebelum peluncuran
 
 - Rekaman For Revenge yang ada adalah **satu lagu**, belum dokumentasi satu pertunjukan 30+ menit. Saat demo, video/audio live ini serta lagu pertama dari setiap kompilasi dapat diputar sampai selesai secara gratis. **Tidak ada paywall otomatis di detik ke-15.** Setelah sebuah lagu selesai, ajakan dukungan muncul tanpa memblokir pemutar. Untuk konser lengkap nantinya, rencana awal adalah **2–3 lagu utuh gratis**, lalu menawarkan akses konser tersisa pada **batas antar-lagu**, bukan di tengah lagu. Durasi/penempatan batas gratis perlu diuji terhadap penonton nyata.

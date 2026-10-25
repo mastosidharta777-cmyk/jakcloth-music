@@ -12,6 +12,9 @@ async function run() {
   await page.getByRole('heading', { name: 'Tiket Event JakCloth' }).waitFor()
   assert.equal(await page.getByRole('button', { name: 'Tiket segera tersedia' }).isDisabled(), true)
   assert.equal(await page.getByRole('heading', { name: 'Kompilasi Album JakCloth' }).count(), 1)
+  await page.getByText(/Demo: satu lagu pertama per album tersedia dan boleh diputar penuh tanpa batas/).waitFor()
+  // Product copy must not be mistaken for an active 3-play limitation.
+  assert.equal(await page.getByText(/Pada rilis lengkap: 3 pemutaran gratis per album/).count(), 1)
   assert.equal(await page.getByRole('heading', { name: 'Artis Favorit' }).count(), 1)
   assert.equal(await page.getByText('Stage Crowd Voting').count(), 0)
   console.log('PASS initial mobile navigation, tickets, artist section, no voting')
