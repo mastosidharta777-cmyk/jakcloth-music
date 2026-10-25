@@ -1,0 +1,84 @@
+import assert from 'node:assert/strict'
+import { chromium } from 'playwright'
+
+const baseURL = process.env.SMOKE_BASE_URL || 'http://127.0.0.1:3123'
+const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] })
+
+async function run() {
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true })
+  const errors = []
+  page.on('pageerror', error => errors.push(error.message))
+  await page.goto(baseURL, { waitUntil: 'domcontentloaded', timeout: 30000 })
+  await page.getByRole('heading', { name: 'Tiket Event JakCloth' }).waitFor()
+  assert.equal(await page.getByRole('button', { name: 'Tiket segera tersedia' }).isDisabled(), true)
+  assert.equal(await page.getByRole('heading', { name: 'Kompilasi Album JakCloth' }).count(), 1)
+  assert.equal(await page.getByRole('heading', { name: 'Artis Favorit' }).count(), 1)
+  assert.equal(await page.getByText('Stage Crowd Voting').count(), 0)
+  console.log('PASS initial mobile navigation, tickets, artist section, no voting')
+
+  // Tapping a cover opens the lightbox without opening the album track list.
+  await page.getByRole('button', { name: 'Perbesar artwork Romantika Urban Kontemporer' }).first().click()
+  await page.getByRole('dialog', { name: /Foto diperbesar/ }).waitFor()
+  assert.equal(await page.getByRole('button', { name: '1. bukan tentangmu Daun Jatuh 04:12' }).count(), 0)
+  await page.getByRole('button', { name: 'Tutup foto' }).click()
+  assert.equal(await page.getByRole('dialog').count(), 0)
+  console.log('PASS photo opens and closes without affecting album selection')
+
+  // Tapping the album title opens songs; tapping the song shows player there, not in Live.
+  await page.getByText('Romantika Urban Kontemporer', { exact: true }).first().click()
+  const daun = page.getByRole('button', { name: /1\. bukan tentangmu.*Daun Jatuh/ })
+  await daun.waitFor()
+  await daun.click()
+  await page.locator('#inline-player-r1 audio').waitFor()
+  assert.equal(await page.getByText('Audio menyusul').count() >= 3, true)
+  assert.equal(await page.locator('#live h2').textContent().then(x => x.includes('For Revenge')), true)
+  console.log('PASS compilation player opens inline; Live performer unchanged')
+
+  await page.getByRole('button', { name: /1\. bukan tentangmu.*Daun Jatuh/ }).click()
+  assert.equal(await page.locator('#inline-player-r1').count(), 0)
+  console.log('PASS tapping selected track closes its player')
+
+  // Pay what you want, only in a demo, with item-specific name.
+  await page.getByRole('button', { name: /Dukung & Buka Album.*Mulai Rp10\.000/ }).first().click()
+  await page.getByRole('heading', { name: 'Simulasi Checkout JakCloth' }).waitFor()
+  await page.locator('#support-amount').fill('20000')
+  assert.equal(await page.getByText('Rp 20.000', { exact: true }).count(), 1)
+  assert.equal(await page.getByText(/Tidak ada QRIS asli/).count(), 1)
+  await page.getByRole('button', { name: 'Batal / Kembali' }).click()
+  console.log('PASS flexible demo checkout, custom amount and cancel')
+
+  // Follow artist state persists locally.
+  const follow = page.getByRole('button', { name: '+ Ikuti' }).first()
+  await follow.click()
+  assert.equal(await page.getByRole('button', { name: 'Mengikuti' }).count(), 1)
+  await page.reload({ waitUntil: 'domcontentloaded' })
+  await page.getByRole('button', { name: 'Mengikuti' }).waitFor()
+  console.log('PASS follow artist persistence across reload')
+
+  // The app remains usable at narrow viewport, with no document-level overflow.
+  const overflow = await page.evaluate(() => ({ body: document.body.scrollWidth, viewport: document.documentElement.clientWidth }))
+  assert.ok(overflow.body <= overflow.viewport + 2, 'Mobile document horizontal overflow: '+JSON.stringify(overflow))
+  assert.deepEqual(errors, [], 'Runtime errors: '+JSON.stringify(errors))
+  console.log('PASS mobile viewport width and no JS runtime exceptions')
+  await page.close()
+
+  const desktop = await browser.newPage({ viewport: { width: 1366, height: 900 } })
+  await desktop.goto(baseURL, { waitUntil: 'domcontentloaded', timeout: 30000 })
+  await desktop.getByRole('heading', { name: 'Kompilasi Album JakCloth' }).waitFor()
+  await desktop.getByRole('button', { name: 'Perbesar foto For Revenge Official Live Tee' }).click()
+  await desktop.getByRole('dialog').waitFor()
+  await desktop.keyboard.press('Escape')
+  assert.equal(await desktop.getByRole('dialog').count(), 0)
+  console.log('PASS desktop merchandise photo modal and Escape closing')
+  await desktop.close()
+}
+
+try {
+  await run()
+  console.log('SMOKE QA PASSED')
+} catch (error) {
+  console.error('SMOKE QA FAILED', error)
+  process.exitCode = 1
+} finally {
+  await browser.close()
+}
