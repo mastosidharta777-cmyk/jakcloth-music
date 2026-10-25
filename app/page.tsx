@@ -397,7 +397,10 @@ export default function Page() {
                 key={activeTrack.videoUrl || activeTrack.id}
                 controls
                 controlsList="nodownload"
-                onPlay={() => inlineAudioRef.current?.pause()}
+                onPlay={() => {
+                  inlineAudioRef.current?.pause()
+                  setInlineTrackId(null)
+                }}
                 className="w-full aspect-video rounded-b-xl"
                 poster="/media/For Revenge Rockaroma Live Performance.png"
                 onTimeUpdate={handleTimeUpdate}
@@ -409,7 +412,10 @@ export default function Page() {
               <div className="w-full p-8 flex flex-col items-center justify-center text-center bg-neutral-950">
                 <span className="text-xs font-mono text-red-400 mb-2">High Quality Audio Stream</span>
                 <p className="font-bold text-lg text-white mb-4">{activeTrack.title} — <span className="text-neutral-400">{activeTrack.artist}</span></p>
-                <audio ref={audioRef} key={activeTrack.audioUrl} controls src={activeTrack.audioUrl} className="w-full max-w-md" onPlay={() => inlineAudioRef.current?.pause()} onTimeUpdate={handleTimeUpdate}>
+                <audio ref={audioRef} key={activeTrack.audioUrl} controls src={activeTrack.audioUrl} className="w-full max-w-md" onPlay={() => {
+                  inlineAudioRef.current?.pause()
+                  setInlineTrackId(null)
+                }} onTimeUpdate={handleTimeUpdate}>
                   Browser Anda tidak mendukung HTML5 audio.
                 </audio>
               </div>
@@ -696,7 +702,7 @@ export default function Page() {
 
             <div className="space-y-3 mb-4">
               <div className="p-4 bg-neutral-950 border border-neutral-800 rounded-lg">
-                <p className="text-sm font-semibold text-white mb-1">Dukung Rekaman Live</p>
+                <p className="text-sm font-semibold text-white mb-1">{inlineTrackId ? 'Dukung Album Kompilasi' : 'Dukung Rekaman Live'}</p>
                 <p className="text-xs text-neutral-400 mb-3">Pay What You Want · Minimum Rp10.000</p>
                 <button
                   onClick={() => inlineTrackId ? handleBuyDigitalAlbum(albums.find(album => album.id === selectedAlbum)?.name || 'Kompilasi JakCloth') : handleBuyDigitalPass()}
