@@ -56,6 +56,15 @@ async function run() {
   await page.getByText(/Suka lagu ini\? Dukung para artis/).waitFor()
   assert.equal(await page.getByRole('button', { name: /Dukung album.*Demo/ }).count(), 1)
   console.log('PASS full compilation song with optional support after natural ending')
+  // Checkout CTA is available after a complete listen; test before changing players.
+  await page.getByRole('button', { name: /Dukung album.*Demo/ }).click()
+  await page.getByRole('heading', { name: 'Simulasi Checkout JakCloth' }).waitFor()
+  await page.locator('#support-amount').fill('20000')
+  assert.equal(await page.getByText('Rp 20.000', { exact: true }).count(), 1)
+  assert.equal(await page.getByText(/Tidak ada QRIS asli/).count(), 1)
+  await page.getByRole('button', { name: 'Batal / Kembali' }).click()
+  console.log('PASS flexible demo checkout, custom amount and cancel')
+
 
   await page.locator('#live video').evaluate(el => el.dispatchEvent(new Event('ended', { bubbles: true })))
   await page.getByText(/Terima kasih sudah menikmati satu lagu lengkap/).waitFor()
@@ -65,16 +74,6 @@ async function run() {
   assert.equal(await page.locator('#inline-player-r1').count(), 0)
   console.log('PASS tapping selected track closes its player')
 
-  // Pay what you want, only in a demo, with item-specific name.
-  await daun.click()
-  await page.locator('#inline-player-r1 audio').evaluate(el => el.dispatchEvent(new Event('ended', { bubbles: true })))
-  await page.getByRole('button', { name: /Dukung album.*Demo/ }).click()
-  await page.getByRole('heading', { name: 'Simulasi Checkout JakCloth' }).waitFor()
-  await page.locator('#support-amount').fill('20000')
-  assert.equal(await page.getByText('Rp 20.000', { exact: true }).count(), 1)
-  assert.equal(await page.getByText(/Tidak ada QRIS asli/).count(), 1)
-  await page.getByRole('button', { name: 'Batal / Kembali' }).click()
-  console.log('PASS flexible demo checkout, custom amount and cancel')
 
   // A long artist list does not overwhelm the mobile screen.
   assert.equal(await page.locator('#artists .grid > div').count(), 5)
