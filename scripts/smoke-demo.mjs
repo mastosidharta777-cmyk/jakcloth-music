@@ -10,7 +10,12 @@ async function run() {
   page.on('pageerror', error => errors.push(error.message))
   await page.goto(baseURL, { waitUntil: 'domcontentloaded', timeout: 30000 })
   await page.getByRole('heading', { name: 'Tiket Event JakCloth' }).waitFor()
+  await page.getByRole('heading', { name: 'Panggungnya berlalu. Musiknya tetap hidup.' }).waitFor()
+  assert.equal(await page.locator('#live').evaluate(el => el.compareDocumentPosition(document.querySelector('#tickets')) & Node.DOCUMENT_POSITION_FOLLOWING), Node.DOCUMENT_POSITION_FOLLOWING)
+  console.log('PASS live and albums take priority over inactive ticketing')
   assert.equal(await page.getByRole('button', { name: 'Tiket segera tersedia' }).isDisabled(), true)
+  assert.equal(await page.getByRole('button', { name: 'Lihat contoh QR' }).count(), 4)
+  assert.equal(await page.getByText(/Stok:/).count(), 0)
   assert.equal(await page.getByRole('heading', { name: 'Kompilasi Album JakCloth' }).count(), 1)
   // Product explanations belong in documentation, not on the listening screen.
   assert.equal(await page.getByText(/Demo: satu lagu pertama per album/).count(), 0)
@@ -31,7 +36,7 @@ async function run() {
   console.log('PASS photo opens and closes without affecting album selection')
 
   // Tapping the album title opens songs; tapping the song shows player there, not in Live.
-  await page.getByText('Romantika Urban Kontemporer', { exact: true }).first().click()
+  await page.getByRole('button', { name: 'Lihat daftar lagu' }).first().click()
   const daun = page.getByRole('button', { name: /1\. bukan tentangmu.*Daun Jatuh/ })
   await daun.waitFor()
   await daun.click()
@@ -58,13 +63,23 @@ async function run() {
   console.log('PASS tapping selected track closes its player')
 
   // Pay what you want, only in a demo, with item-specific name.
-  await page.getByRole('button', { name: /Dukung & Buka Album.*Mulai Rp10\.000/ }).first().click()
+  await daun.click()
+  await page.locator('#inline-player-r1 audio').evaluate(el => el.dispatchEvent(new Event('ended', { bubbles: true })))
+  await page.getByRole('button', { name: /Dukung album.*Demo/ }).click()
   await page.getByRole('heading', { name: 'Simulasi Checkout JakCloth' }).waitFor()
   await page.locator('#support-amount').fill('20000')
   assert.equal(await page.getByText('Rp 20.000', { exact: true }).count(), 1)
   assert.equal(await page.getByText(/Tidak ada QRIS asli/).count(), 1)
   await page.getByRole('button', { name: 'Batal / Kembali' }).click()
   console.log('PASS flexible demo checkout, custom amount and cancel')
+
+  // A long artist list does not overwhelm the mobile screen.
+  assert.equal(await page.locator('#artists .grid > div').count(), 5)
+  await page.getByRole('button', { name: /Lihat semua .* artis/ }).click()
+  assert.ok(await page.locator('#artists .grid > div').count() > 5)
+  await page.getByRole('button', { name: 'Tampilkan lebih sedikit' }).click()
+  assert.equal(await page.locator('#artists .grid > div').count(), 5)
+  console.log('PASS expandable artist list')
 
   // Follow artist state persists locally.
   const follow = page.getByRole('button', { name: '+ Ikuti' }).first()
