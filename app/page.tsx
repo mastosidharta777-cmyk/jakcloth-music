@@ -87,7 +87,7 @@ export default function Page() {
       id: 'm1',
       title: 'BAB III',
       artist: 'The Skit',
-      type: 'Manifesto Gigs Bawah',
+      type: 'Manifesto Gigs Bawah Tanah',
       duration: '03:47',
       audioUrl: '/media/The Skit - BAB III.mp3'
     },
@@ -95,7 +95,7 @@ export default function Page() {
       id: 'm2',
       title: 'Kebelet',
       artist: 'Sukses Lancar Rejeki',
-      type: 'Manifesto Gigs Bawah',
+      type: 'Manifesto Gigs Bawah Tanah',
       duration: '03:22',
       audioUrl: '/media/Sukses Lancar Rejeki - Kebelet.mp3'
     },
@@ -103,7 +103,7 @@ export default function Page() {
       id: 'm3',
       title: 'Lucid',
       artist: 'CLOSEME',
-      type: 'Manifesto Gigs Bawah',
+      type: 'Manifesto Gigs Bawah Tanah',
       duration: '03:54',
       audioUrl: '/media/CLOSEME - Lucid.mp3'
     },
@@ -111,7 +111,7 @@ export default function Page() {
       id: 'm4',
       title: 'Punk!',
       artist: 'The Sidhartas',
-      type: 'Manifesto Gigs Bawah',
+      type: 'Manifesto Gigs Bawah Tanah',
       duration: '02:58',
       audioUrl: '/media/The Sidhartas - Punk!.mp3'
     },
@@ -166,7 +166,7 @@ export default function Page() {
     },
     {
       id: 'manifesto',
-      name: 'Manifesto Gigs Bawah',
+      name: 'Manifesto Gigs Bawah Tanah',
       genre: 'Underground',
       cover: '/media/Jakcloth - MGBT - artwork.jpg'
     },
@@ -459,7 +459,7 @@ export default function Page() {
                 .map((album) => {
                   const albumTracks = tracks.filter((track) => {
                     if (album.id === 'romantika') return track.type === 'Romantika Urban Kontemporer'
-                    if (album.id === 'manifesto') return track.type === 'Manifesto Gigs Bawah'
+                    if (album.id === 'manifesto') return track.type === 'Manifesto Gigs Bawah Tanah'
                     if (album.id === 'sakramen') return track.type === 'Sakramen Kebisingan Ekstrim'
                     return false
                   })
