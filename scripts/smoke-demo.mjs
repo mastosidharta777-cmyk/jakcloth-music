@@ -20,6 +20,7 @@ async function run() {
   assert.equal(await page.getByRole('button', { name: 'Lihat contoh QR' }).count(), 4)
   assert.equal(await page.getByText(/Stok:/).count(), 0)
   assert.equal(await page.getByRole('heading', { name: 'Kompilasi Album JakCloth' }).count(), 1)
+  assert.equal(await page.getByText('Manifesto Gigs Bawah Tanah', { exact: true }).count(), 1)
   // Product explanations belong in documentation, not on the listening screen.
   assert.equal(await page.getByText(/Demo: satu lagu pertama per album/).count(), 0)
   assert.equal(await page.getByText(/Pada rilis lengkap: 3 pemutaran gratis per album/).count(), 0)
