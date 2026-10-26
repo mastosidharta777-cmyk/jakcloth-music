@@ -11,7 +11,10 @@ async function run() {
   await page.goto(baseURL, { waitUntil: 'domcontentloaded', timeout: 30000 })
   await page.getByRole('heading', { name: 'Tiket Event JakCloth' }).waitFor()
   await page.getByRole('heading', { name: 'Panggungnya berlalu. Musiknya tetap hidup.' }).waitFor()
-  assert.equal(await page.locator('#live').evaluate(el => el.compareDocumentPosition(document.querySelector('#tickets')) & Node.DOCUMENT_POSITION_FOLLOWING), Node.DOCUMENT_POSITION_FOLLOWING)
+  const livePrecedesTickets = await page.locator('#live').evaluate(el =>
+    Boolean(el.compareDocumentPosition(document.querySelector('#tickets')) & Node.DOCUMENT_POSITION_FOLLOWING)
+  )
+  assert.equal(livePrecedesTickets, true)
   console.log('PASS live and albums take priority over inactive ticketing')
   assert.equal(await page.getByRole('button', { name: 'Tiket segera tersedia' }).isDisabled(), true)
   assert.equal(await page.getByRole('button', { name: 'Lihat contoh QR' }).count(), 4)
