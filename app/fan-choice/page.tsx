@@ -32,7 +32,6 @@ const ARTISTS: Artist[] = [
 ]
 
 const CITIES = ['Jakarta', 'Bandung', 'Surabaya', 'Yogyakarta', 'Medan', 'Bali', 'Kota lainnya']
-const GENRES = ['Indie Pop', 'Rock', 'Pop Alternatif', 'Punk', 'Hardcore', 'Hip-Hop', 'Metal', 'Elektronik', 'Lainnya']
 
 function normalizeName(name: string): string {
   return name.trim().replace(/\s+/g, ' ').toLocaleLowerCase('id-ID')
@@ -57,7 +56,7 @@ export default function FanChoicePage() {
   const [tab, setTab] = useState<'list' | 'suggest'>('list')
   const [search, setSearch] = useState('')
   const [newName, setNewName] = useState('')
-  const [newGenre, setNewGenre] = useState('Indie Pop')
+  const [newGenre, setNewGenre] = useState('')
   const [suggestions, setSuggestions] = useState<Artist[]>([])
   const [supports, setSupports] = useState<Support[]>([])
   const [message, setMessage] = useState('')
@@ -133,17 +132,19 @@ export default function FanChoicePage() {
       setTab('list')
       setSearch(existing.name)
       setNewName('')
+      setNewGenre('')
       return
     }
     const newArtist: Artist = {
       id: 'suggested-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8),
       name: cleanName,
-      genre: newGenre,
+      genre: newGenre.trim().replace(/\s+/g, ' ').slice(0, 60),
       isSuggestion: true,
     }
     setSuggestions(current => [...current, newArtist])
     setSupports(current => [...current, { artistId: newArtist.id, city }])
     setNewName('')
+    setNewGenre('')
     setTab('list')
     setSearch(cleanName)
     setMessage('Usulan ' + cleanName + ' dan dukunganmu untuk kota ' + city + ' tersimpan di browser ini.')
@@ -227,7 +228,7 @@ export default function FanChoicePage() {
                       <div aria-hidden="true" className={'flex h-12 w-12 shrink-0 items-center justify-center rounded-lg text-xl font-black ' + (index % 2 === 0 ? 'bg-gradient-to-br from-red-800 to-neutral-900' : 'bg-gradient-to-br from-indigo-900 to-neutral-900')}>♪</div>
                       <div className="min-w-0 flex-1">
                         <p className="font-bold text-white">{artist.name}</p>
-                        <p className="text-xs text-neutral-400">{artist.genre} {artist.isSuggestion ? '· Usulanmu (demo)' : '· Artis contoh'}</p>
+                        <p className="text-xs text-neutral-400">{artist.isSuggestion ? (artist.genre ? 'Genre usulan: ' + artist.genre + ' (belum diverifikasi) · Usulanmu (demo)' : 'Genre tidak diisi · Usulanmu (demo)') : artist.genre + ' · Artis contoh'}</p>
                       </div>
                       <button type="button" onClick={() => toggleSupport(artist)}
                         aria-pressed={supported} disabled={!ready || !cityValid}
@@ -254,11 +255,11 @@ export default function FanChoicePage() {
                   placeholder="Contoh: nama band favorit" className="mt-2 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-white focus:border-red-500 focus:outline-none" />
               </label>
               <label className="block text-sm font-medium">
-                Genre
-                <select value={newGenre} onChange={e => setNewGenre(e.target.value)}
-                  className="mt-2 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-white focus:border-red-500 focus:outline-none">
-                  {GENRES.map(g => <option key={g} value={g}>{g}</option>)}
-                </select>
+                Genre <span className="font-normal text-neutral-400">(opsional)</span>
+                <input type="text" value={newGenre} onChange={e => setNewGenre(e.target.value)} maxLength={60}
+                  placeholder="Contoh: rock, indie pop — boleh dikosongkan"
+                  className="mt-2 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-white placeholder:text-neutral-500 focus:border-red-500 focus:outline-none" />
+                <span className="mt-1 block text-xs font-normal text-neutral-400">Jika tidak tahu genrenya, kosongkan saja. Genre usulan belum terverifikasi oleh JakCloth.</span>
               </label>
               <p className="text-sm text-neutral-400">Kota tujuan: <span className="font-semibold text-white">{cityValid ? city : 'Belum valid'}</span></p>
               <button type="submit" disabled={!ready || !cityValid || newName.trim().length < 2}
