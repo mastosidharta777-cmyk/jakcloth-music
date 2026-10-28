@@ -333,7 +333,7 @@ export default function Page() {
       </header>
 
       <nav aria-label="Navigasi JakCloth" className="max-w-4xl mx-auto px-4 pt-3 flex gap-2 overflow-x-auto text-sm">
-        {[['#live','Live'],['#music','Kompilasi'],['#tickets','Tiket'],['#merch','Merch'],['#artists','Artis Favorit']].map(([href,label]) =>
+        {[['#live','Live'],['#music','Kompilasi'],['/fan-choice','Fan Choice'],['#tickets','Tiket'],['#merch','Merch'],['#artists','Artis Favorit']].map(([href,label]) =>
           <a key={href} href={href} className="shrink-0 rounded-full border border-neutral-700 bg-neutral-900 px-3 py-2 text-neutral-200 hover:border-red-500">{label}</a>)}
       </nav>
       <main className="max-w-4xl mx-auto px-4 mt-5 space-y-8">
