@@ -35,6 +35,8 @@ Fan Choice tersedia **langsung di beranda (`/`)** sesudah bagian Promo Brand di 
 - Mencari dan mendukung artis pada daftar contoh, dengan dukungan terpisah per kota.
 - Mengusulkan artis/band baru, mendeteksi nama yang sama, dan menambahkan dukungan untuk usulan tersebut. Genre dapat diketik bebas dan **boleh dikosongkan**; tanpa pilihan otomatis. Genre yang disampaikan pengunjung bukan klasifikasi resmi dan masih perlu diverifikasi JakCloth.
 - Menyimpan dukungan serta usulan di localStorage perangkat, bahkan setelah halaman dimuat ulang.
+- Setelah klik **Dukung** pertama kali di perangkat, muncul **pop-up simulasi visual berbagi** (Instagram, Facebook, TikTok, YouTube Shorts) dengan tombol **Nanti saja** / tutup / Escape. Ikon platform hanya pratinjau, bukan tautan dan tidak melakukan posting.
+- Pop-up tidak otomatis berulang pada dukungan berikutnya. Tombol **Lihat contoh pop-up berbagi** di area Dukungan saya dapat membuka pratinjau lagi untuk presentasi. Status pernah tampil disimpan dalam localStorage terpisah, tanpa backend.
 
 **Batasan:** tanpa login, backend, moderasi, database publik, peringkat umum, atau penghitungan suara lintas perangkat. Angka dukungan yang ditampilkan hanya milik perangkat ini. Artis di daftar adalah contoh, bukan kandidat resmi atau konfirmasi booking. Jangan gunakan data demo sebagai masukan keputusan booking JakCloth. Produksi membutuhkan akun terverifikasi, deduplikasi di server, perlindungan spam, moderasi nama, dan agregasi kota secara aman.
 
