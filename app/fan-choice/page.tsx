@@ -132,6 +132,7 @@ export default function FanChoicePage() {
       setTab('list')
       setSearch(existing.name)
       setNewName('')
+      setNewGenre('')
       return
     }
     const newArtist: Artist = {
