@@ -41,11 +41,11 @@ async function run() {
     const fan = document.getElementById('fan-choice')
     const promo = [...document.querySelectorAll('h3')].find(h => h.textContent?.trim() === 'Promo Brand di Event')
     return Boolean(merch && fan && promo &&
-      merch.compareDocumentPosition(fan) & Node.DOCUMENT_POSITION_FOLLOWING &&
-      fan.compareDocumentPosition(promo) & Node.DOCUMENT_POSITION_FOLLOWING)
+      merch.compareDocumentPosition(promo) & Node.DOCUMENT_POSITION_FOLLOWING &&
+      promo.compareDocumentPosition(fan) & Node.DOCUMENT_POSITION_FOLLOWING)
   })
-  assert.equal(sectionOrder, true, 'Fan Choice must follow merchandise and precede brand promo')
-  console.log('PASS Fan Choice follows merchandise in homepage; redundant artist follow panel removed')
+  assert.equal(sectionOrder, true, 'Fan Choice must follow Promo Brand as the last homepage section')
+  console.log('PASS Fan Choice follows Promo Brand in homepage; redundant artist follow panel removed')
 
   // Tapping a cover opens the lightbox without opening the album track list.
   await page.getByRole('button', { name: 'Perbesar artwork Romantika Urban Kontemporer' }).first().click()
