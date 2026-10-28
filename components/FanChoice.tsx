@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 type Artist = {
   id: string
@@ -20,6 +20,7 @@ type SavedFanChoice = {
 }
 
 const STORAGE_KEY = 'jakcloth-fan-choice-demo-v1'
+const SHARE_PREVIEW_SEEN_KEY = 'jakcloth-fan-choice-share-preview-seen-v1'
 
 const ARTISTS: Artist[] = [
   { id: 'for-revenge', name: 'For Revenge', genre: 'Alternative Rock' },
@@ -59,9 +60,13 @@ export default function FanChoice() {
   const [suggestions, setSuggestions] = useState<Artist[]>([])
   const [supports, setSupports] = useState<Support[]>([])
   const [message, setMessage] = useState('')
+  const [sharePreview, setSharePreview] = useState<{ artistName: string; cityName: string } | null>(null)
+  const [sharePreviewSeen, setSharePreviewSeen] = useState(false)
+  const shareCloseRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     try {
+      setSharePreviewSeen(localStorage.getItem(SHARE_PREVIEW_SEEN_KEY) === '1')
       const raw = localStorage.getItem(STORAGE_KEY)
       if (raw) {
         const saved = JSON.parse(raw) as Partial<SavedFanChoice>
@@ -87,6 +92,23 @@ export default function FanChoice() {
     }
   }, [ready, suggestions, supports])
 
+  useEffect(() => {
+    if (!sharePreview) return
+    const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    shareCloseRef.current?.focus()
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSharePreview(null)
+    }
+    document.addEventListener('keydown', onEscape)
+    return () => {
+      document.removeEventListener('keydown', onEscape)
+      document.body.style.overflow = previousOverflow
+      previouslyFocused?.focus()
+    }
+  }, [sharePreview])
+
   const city = selectedCity === 'Kota lainnya' ? customCity.trim().replace(/\s+/g, ' ') : selectedCity
   const cityValid = city.length >= 2 && city.length <= 60
   const allArtists = useMemo(() => [...ARTISTS, ...suggestions], [suggestions])
@@ -108,6 +130,16 @@ export default function FanChoice() {
       ? current.filter(s => !(s.artistId === artist.id && s.city === city))
       : [...current.filter(s => !(s.artistId === artist.id && s.city === city)), { artistId: artist.id, city }])
     setMessage(exists ? 'Dukungan untuk ' + artist.name + ' dibatalkan di ' + city + '.' : 'Dukungan untuk ' + artist.name + ' di ' + city + ' tersimpan pada perangkat ini.')
+    // Demo-only visual preview, once per device, only after clicking Dukung.
+    if (!exists && !sharePreviewSeen) {
+      setSharePreviewSeen(true)
+      setSharePreview({ artistName: artist.name, cityName: city })
+      try {
+        localStorage.setItem(SHARE_PREVIEW_SEEN_KEY, '1')
+      } catch {
+        // The dialog still works during this session if localStorage is unavailable.
+      }
+    }
   }
 
   function submitSuggestion(e: React.FormEvent<HTMLFormElement>) {
@@ -262,8 +294,14 @@ export default function FanChoice() {
           <h2 className="text-lg font-bold">Dukungan saya {cityValid ? '— ' + city : ''}</h2>
           <p className="mt-1 text-sm text-neutral-400">Pilihan ini tersimpan di perangkat, bukan menjadi hasil voting publik.</p>
           {selectedArtists.length > 0 ? (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {selectedArtists.map(a => <span key={a.id} className="rounded-full border border-red-900 bg-red-950/50 px-3 py-2 text-sm text-red-100">♥ {a.name}</span>)}
+            <div className="mt-4 space-y-3">
+              <div className="flex flex-wrap gap-2">
+                {selectedArtists.map(a => <span key={a.id} className="rounded-full border border-red-900 bg-red-950/50 px-3 py-2 text-sm text-red-100">♥ {a.name}</span>)}
+              </div>
+              <button type="button" onClick={() => setSharePreview({ artistName: selectedArtists[0].name, cityName: city })}
+                className="rounded-lg border border-neutral-600 px-3 py-2 text-xs font-semibold text-neutral-200 hover:border-red-500 hover:text-white">
+                Lihat contoh pop-up berbagi
+              </button>
             </div>
           ) : (
             <p className="mt-4 text-sm text-neutral-500">Belum ada artis yang kamu dukung untuk kota ini.</p>
@@ -273,6 +311,53 @@ export default function FanChoice() {
         <p className="mx-auto mt-6 max-w-3xl text-center text-xs leading-relaxed text-neutral-500">
           Hasil dukungan dan usulan nantinya dapat menjadi masukan kurasi JakCloth setelah sistem akun, moderasi, dan penghitungan suara yang sah tersedia. Partisipasi tidak menjamin artis tampil.
         </p>
+
+        {sharePreview && (
+          <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm"
+            role="presentation" onClick={() => setSharePreview(null)}>
+            <div role="dialog" aria-modal="true" aria-labelledby="share-preview-title"
+              className="relative max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-2xl border border-neutral-700 bg-neutral-900 p-5 text-white shadow-2xl sm:p-6"
+              onClick={event => event.stopPropagation()}>
+              <button ref={shareCloseRef} type="button" aria-label="Tutup pop-up berbagi"
+                onClick={() => setSharePreview(null)}
+                className="absolute right-3 top-3 rounded-lg border border-neutral-700 px-3 py-1.5 text-lg text-neutral-300 hover:bg-neutral-800 hover:text-white">
+                ×
+              </button>
+              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-950 text-3xl text-red-400" aria-hidden="true">♥</div>
+              <span className="text-xs font-bold uppercase tracking-widest text-red-400">Fan Choice · Simulasi</span>
+              <h3 id="share-preview-title" className="mt-2 pr-7 text-2xl font-black leading-snug">Dukunganmu tersimpan!</h3>
+              <p className="mt-3 text-sm leading-relaxed text-neutral-200">
+                Kamu mendukung <strong className="text-white">{sharePreview.artistName}</strong> untuk tampil di JakCloth <strong className="text-white">{sharePreview.cityName}</strong>.
+              </p>
+              <p className="mt-3 text-sm font-semibold text-white">Ajak temanmu ikut mendukung</p>
+              <div className="mt-3 grid grid-cols-2 gap-3" aria-label="Contoh pilihan platform berbagi">
+                <div className="flex items-center gap-3 rounded-xl border border-fuchsia-700/40 bg-gradient-to-br from-fuchsia-900/60 to-rose-900/40 p-3">
+                  <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-purple-600 via-pink-600 to-amber-500 text-sm font-black">IG</span>
+                  <span className="text-sm font-semibold">Instagram</span>
+                </div>
+                <div className="flex items-center gap-3 rounded-xl border border-blue-700/40 bg-blue-950/50 p-3">
+                  <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-2xl font-black">f</span>
+                  <span className="text-sm font-semibold">Facebook</span>
+                </div>
+                <div className="flex items-center gap-3 rounded-xl border border-neutral-600 bg-neutral-950 p-3">
+                  <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-neutral-600 bg-black text-xl font-black text-cyan-300">♪</span>
+                  <span className="text-sm font-semibold">TikTok</span>
+                </div>
+                <div className="flex items-center gap-3 rounded-xl border border-red-800/40 bg-red-950/50 p-3">
+                  <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-600 text-xl font-black">▶</span>
+                  <span className="text-sm font-semibold">YouTube Shorts</span>
+                </div>
+              </div>
+              <p className="mt-4 rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-3 text-xs leading-relaxed text-neutral-400">
+                Pratinjau tampilan saja. Pilihan platform di atas tidak dapat diklik dan belum mengunggah atau membagikan konten. Dukungan hanya tersimpan di browser perangkat ini.
+              </p>
+              <button type="button" onClick={() => setSharePreview(null)}
+                className="mt-4 w-full rounded-xl bg-red-600 px-4 py-3 text-sm font-bold text-white hover:bg-red-700">
+                Nanti saja
+              </button>
+            </div>
+          </div>
+        )}
     </div>
   )
 }
