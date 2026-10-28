@@ -30,7 +30,7 @@ Spesifikasi untuk rilis penuh: [Preview 3 pemutaran per album, soft selling, dan
 
 ## Fan Choice — simulasi interaktif
 
-Fan Choice tersedia **langsung di beranda (`/`)** setelah katalog kompilasi. Tombol navigasi menuju bagian `#fan-choice`, tanpa meninggalkan halaman. Alamat **`/fan-choice`** tetap bisa digunakan untuk akses langsung dan memakai komponen serta penyimpanan simulasi yang sama. Bagian lama **Artis Favorit** dengan tombol `+ Ikuti` dihapus karena fungsinya tumpang tindih. Demo mendukung:
+Fan Choice tersedia **langsung di beranda (`/`)** sesudah bagian Promo Brand di Event (setelah Merchandise). Tombol navigasi menuju bagian `#fan-choice`, tanpa meninggalkan halaman. Alamat **`/fan-choice`** tetap bisa digunakan untuk akses langsung dan memakai komponen serta penyimpanan simulasi yang sama. Bagian lama **Artis Favorit** dengan tombol `+ Ikuti` dihapus karena fungsinya tumpang tindih. Demo mendukung:
 - Memilih kota tujuan (Jakarta, Bandung, Surabaya, Yogyakarta, Medan, Bali, atau kota lain).
 - Mencari dan mendukung artis pada daftar contoh, dengan dukungan terpisah per kota.
 - Mengusulkan artis/band baru, mendeteksi nama yang sama, dan menambahkan dukungan untuk usulan tersebut. Genre dapat diketik bebas dan **boleh dikosongkan**; tanpa pilihan otomatis. Genre yang disampaikan pengunjung bukan klasifikasi resmi dan masih perlu diverifikasi JakCloth.

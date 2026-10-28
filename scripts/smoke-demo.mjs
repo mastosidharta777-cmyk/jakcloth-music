@@ -32,8 +32,20 @@ async function run() {
   assert.equal(await page.locator('#artists').count(), 0)
   assert.equal(await page.locator('#fan-choice').count(), 1)
   assert.equal(await page.getByRole('link', { name: 'Fan Choice' }).getAttribute('href'), '#fan-choice')
+  const menuLabels = await page.getByRole('navigation', { name: 'Navigasi JakCloth' }).locator('a').allTextContents()
+  assert.deepEqual(menuLabels, ['Live', 'Kompilasi', 'Tiket', 'Merch', 'Fan Choice'])
   assert.equal(await page.getByText('Stage Crowd Voting').count(), 0)
-  console.log('PASS Fan Choice is integrated into homepage; redundant artist follow panel removed')
+  // Homepage funnel: consume music, see tickets and merchandise, then Fan Choice.
+  const sectionOrder = await page.evaluate(() => {
+    const merch = document.getElementById('merch')
+    const fan = document.getElementById('fan-choice')
+    const promo = [...document.querySelectorAll('h3')].find(h => h.textContent?.trim() === 'Promo Brand di Event')
+    return Boolean(merch && fan && promo &&
+      merch.compareDocumentPosition(promo) & Node.DOCUMENT_POSITION_FOLLOWING &&
+      promo.compareDocumentPosition(fan) & Node.DOCUMENT_POSITION_FOLLOWING)
+  })
+  assert.equal(sectionOrder, true, 'Fan Choice must follow Promo Brand as the last homepage section')
+  console.log('PASS Fan Choice follows Promo Brand in homepage; redundant artist follow panel removed')
 
   // Tapping a cover opens the lightbox without opening the album track list.
   await page.getByRole('button', { name: 'Perbesar artwork Romantika Urban Kontemporer' }).first().click()
