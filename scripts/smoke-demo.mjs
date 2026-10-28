@@ -182,7 +182,8 @@ async function run() {
   await fan.getByText(/Artis sudah ada di daftar/).waitFor()
   const stored = await fan.evaluate(() => JSON.parse(localStorage.getItem('jakcloth-fan-choice-demo-v1')))
   assert.equal(stored.suggestions.length, 2)
-  assert.equal(stored.supports.length, 3)
+  // Jakarta For Revenge + Bandung For Revenge + two new proposed artists.
+  assert.equal(stored.supports.length, 4)
   const fanOverflow = await fan.evaluate(() => ({ body: document.body.scrollWidth, viewport: document.documentElement.clientWidth }))
   assert.ok(fanOverflow.body <= fanOverflow.viewport + 2, 'Fan Choice mobile overflow: ' + JSON.stringify(fanOverflow))
   assert.deepEqual(fanErrors, [], 'Fan Choice runtime errors: ' + JSON.stringify(fanErrors))
