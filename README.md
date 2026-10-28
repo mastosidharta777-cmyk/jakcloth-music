@@ -33,7 +33,7 @@ Spesifikasi untuk rilis penuh: [Preview 3 pemutaran per album, soft selling, dan
 Buka halaman **/fan-choice** dari menu navigasi. Demo mendukung:
 - Memilih kota tujuan (Jakarta, Bandung, Surabaya, Yogyakarta, Medan, Bali, atau kota lain).
 - Mencari dan mendukung artis pada daftar contoh, dengan dukungan terpisah per kota.
-- Mengusulkan artis/band baru, mendeteksi nama yang sama, dan menambahkan dukungan untuk usulan tersebut.
+- Mengusulkan artis/band baru, mendeteksi nama yang sama, dan menambahkan dukungan untuk usulan tersebut. Genre dapat diketik bebas dan **boleh dikosongkan**; tanpa pilihan otomatis. Genre yang disampaikan pengunjung bukan klasifikasi resmi dan masih perlu diverifikasi JakCloth.
 - Menyimpan dukungan serta usulan di localStorage perangkat, bahkan setelah halaman dimuat ulang.
 
 **Batasan:** tanpa login, backend, moderasi, database publik, peringkat umum, atau penghitungan suara lintas perangkat. Angka dukungan yang ditampilkan hanya milik perangkat ini. Artis di daftar adalah contoh, bukan kandidat resmi atau konfirmasi booking. Jangan gunakan data demo sebagai masukan keputusan booking JakCloth. Produksi membutuhkan akun terverifikasi, deduplikasi di server, perlindungan spam, moderasi nama, dan agregasi kota secara aman.
