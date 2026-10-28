@@ -316,7 +316,7 @@ export default function Page() {
       </header>
 
       <nav aria-label="Navigasi JakCloth" className="max-w-4xl mx-auto px-4 pt-3 flex gap-2 overflow-x-auto text-sm">
-        {[['#live','Live'],['#music','Kompilasi'],['#fan-choice','Fan Choice'],['#tickets','Tiket'],['#merch','Merch']].map(([href,label]) =>
+        {[['#live','Live'],['#music','Kompilasi'],['#tickets','Tiket'],['#merch','Merch'],['#fan-choice','Fan Choice']].map(([href,label]) =>
           <a key={href} href={href} className="shrink-0 rounded-full border border-neutral-700 bg-neutral-900 px-3 py-2 text-neutral-200 hover:border-red-500">{label}</a>)}
       </nav>
       <main className="max-w-4xl mx-auto px-4 mt-5 space-y-8">
@@ -520,8 +520,6 @@ export default function Page() {
           )}
         </section>
 
-        <FanChoice />
-
         <section id="tickets" className="bg-neutral-900 border border-neutral-800 rounded-xl p-5 scroll-mt-24">
           <p className="text-xs font-semibold uppercase tracking-widest text-red-500">Events & Tickets</p>
           <h2 className="text-xl font-bold text-white mt-1">Tiket Event JakCloth</h2>
@@ -565,6 +563,8 @@ export default function Page() {
             ))}
           </div>
         </section>
+
+        <FanChoice />
 
         <section className="bg-neutral-900 border border-neutral-800 rounded-xl p-5">
           <div className="mb-4">
