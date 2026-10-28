@@ -114,7 +114,7 @@ async function run() {
   await fan.reload({ waitUntil: 'domcontentloaded' })
   await fan.getByRole('button', { name: '♥ Didukung' }).waitFor()
   await fan.getByRole('button', { name: 'Bandung' }).click()
-  await fan.getByRole('button', { name: '♡ Dukung' }).waitFor()
+  await fan.getByRole('button', { name: '♡ Dukung' }).first().waitFor()
   await fan.getByRole('button', { name: 'Jakarta' }).click()
   await fan.getByRole('button', { name: '♥ Didukung' }).waitFor()
   console.log('PASS Fan Choice support persists and cities stay separate')
