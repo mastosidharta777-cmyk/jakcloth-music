@@ -27,9 +27,13 @@ async function run() {
   const albumCover = page.getByRole('button', { name: 'Perbesar artwork Romantika Urban Kontemporer' }).first().locator('img')
   assert.equal(await albumCover.evaluate(image => getComputedStyle(image).objectFit), 'contain')
   console.log('PASS album cover fits fully and no internal demo copy')
-  assert.equal(await page.getByRole('heading', { name: 'Artis Favorit' }).count(), 1)
+  assert.equal(await page.getByRole('heading', { name: 'Artis Favorit' }).count(), 0)
+  assert.equal(await page.getByRole('button', { name: '+ Ikuti' }).count(), 0)
+  assert.equal(await page.locator('#artists').count(), 0)
+  assert.equal(await page.locator('#fan-choice').count(), 1)
+  assert.equal(await page.getByRole('link', { name: 'Fan Choice' }).getAttribute('href'), '#fan-choice')
   assert.equal(await page.getByText('Stage Crowd Voting').count(), 0)
-  console.log('PASS initial mobile navigation, tickets, artist section, no voting')
+  console.log('PASS Fan Choice is integrated into homepage; redundant artist follow panel removed')
 
   // Tapping a cover opens the lightbox without opening the album track list.
   await page.getByRole('button', { name: 'Perbesar artwork Romantika Urban Kontemporer' }).first().click()
@@ -76,21 +80,15 @@ async function run() {
   console.log('PASS tapping selected track closes its player')
 
 
-  // A long artist list does not overwhelm the mobile screen.
-  assert.equal(await page.locator('#artists .grid > div').count(), 5)
-  await page.getByRole('button', { name: /Lihat semua .* artis/ }).click()
-  assert.ok(await page.locator('#artists .grid > div').count() > 5)
-  await page.getByRole('button', { name: 'Tampilkan lebih sedikit' }).click()
-  assert.equal(await page.locator('#artists .grid > div').count(), 5)
-  console.log('PASS expandable artist list')
-
-  // Follow artist state persists locally.
-  const follow = page.getByRole('button', { name: '+ Ikuti' }).first()
-  await follow.click()
-  assert.equal(await page.getByRole('button', { name: 'Mengikuti' }).count(), 1)
+  // Fan Choice is usable directly in the homepage without leaving the app.
+  await page.getByRole('link', { name: 'Fan Choice' }).click()
+  await page.locator('#fan-choice').getByRole('heading', { name: 'Fan Choice' }).waitFor()
+  await page.locator('#fan-choice').getByRole('searchbox', { name: 'Cari artis, band, atau genre' }).fill('For Revenge')
+  await page.locator('#fan-choice').getByRole('button', { name: '♡ Dukung' }).click()
+  await page.locator('#fan-choice').getByRole('button', { name: '♥ Didukung' }).waitFor()
   await page.reload({ waitUntil: 'domcontentloaded' })
-  await page.getByRole('button', { name: 'Mengikuti' }).waitFor()
-  console.log('PASS follow artist persistence across reload')
+  await page.locator('#fan-choice').getByRole('button', { name: '♥ Didukung' }).waitFor()
+  console.log('PASS Fan Choice home integration and support persistence on reload')
 
   // The app remains usable at narrow viewport, with no document-level overflow.
   const overflow = await page.evaluate(() => ({ body: document.body.scrollWidth, viewport: document.documentElement.clientWidth }))
@@ -152,6 +150,14 @@ async function run() {
   assert.ok(fanOverflow.body <= fanOverflow.viewport + 2, 'Fan Choice mobile overflow: ' + JSON.stringify(fanOverflow))
   assert.deepEqual(fanErrors, [], 'Fan Choice runtime errors: ' + JSON.stringify(fanErrors))
   console.log('PASS duplicate artist prevention, valid data and mobile layout')
+  // Standalone route and homepage use exactly the same underlying local state.
+  await fan.goto(baseURL + '/fan-choice', { waitUntil: 'domcontentloaded' })
+  await fan.getByText('Band Genre QA', { exact: true }).first().waitFor()
+  await fan.getByRole('link', { name: /Kembali ke aplikasi/ }).click()
+  await fan.locator('#fan-choice').getByText('Band Genre QA', { exact: true }).first().waitFor()
+  const shared = await fan.evaluate(() => JSON.parse(localStorage.getItem('jakcloth-fan-choice-demo-v1')))
+  assert.equal(shared.suggestions.length, 2)
+  console.log('PASS standalone and homepage routes share the same Fan Choice data')
   await fan.close()
 
   const desktop = await browser.newPage({ viewport: { width: 1366, height: 900 } })
