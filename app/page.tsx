@@ -564,8 +564,6 @@ export default function Page() {
           </div>
         </section>
 
-        <FanChoice />
-
         <section className="bg-neutral-900 border border-neutral-800 rounded-xl p-5">
           <div className="mb-4">
             <h3 className="text-lg font-bold text-white">Promo Brand di Event</h3>
@@ -619,7 +617,7 @@ export default function Page() {
           )}
         </section>
 
-
+        <FanChoice />
       </main>
 
       {photoPreview && (
