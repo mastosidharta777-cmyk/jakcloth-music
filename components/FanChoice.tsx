@@ -300,7 +300,7 @@ export default function FanChoice() {
               </div>
               <button type="button" onClick={() => setSharePreview({ artistName: selectedArtists[0].name, cityName: city })}
                 className="rounded-lg border border-neutral-600 px-3 py-2 text-xs font-semibold text-neutral-200 hover:border-red-500 hover:text-white">
-                Lihat contoh pop-up berbagi
+                Bagikan dukungan
               </button>
             </div>
           ) : (
