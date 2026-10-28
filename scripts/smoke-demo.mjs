@@ -114,7 +114,7 @@ async function run() {
   await page.locator('#fan-choice').getByRole('button', { name: 'Bandung' }).click()
   await page.locator('#fan-choice').getByRole('button', { name: '♡ Dukung' }).first().click()
   assert.equal(await page.getByRole('dialog', { name: 'Dukunganmu tersimpan!' }).count(), 0, 'No automatic popup after first support')
-  await page.locator('#fan-choice').getByRole('button', { name: 'Lihat contoh pop-up berbagi' }).click()
+  await page.locator('#fan-choice').getByRole('button', { name: 'Bagikan dukungan' }).click()
   const manualSharePreview = page.getByRole('dialog', { name: 'Dukunganmu tersimpan!' })
   await manualSharePreview.waitFor()
   await manualSharePreview.getByText(/JakCloth Bandung/).waitFor()
