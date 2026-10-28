@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { merchandise } from '@/lib/data'
+import FanChoice from '@/components/FanChoice'
 
 interface Track {
   id: string
@@ -32,7 +33,6 @@ export default function Page() {
   const [showQrisModal, setShowQrisModal] = useState(false)
   const [selectedPaymentItem, setSelectedPaymentItem] = useState<{ name: string; price: string; flexible?: boolean } | null>(null)
   const [supportAmount, setSupportAmount] = useState(10000)
-  const [followedArtists, setFollowedArtists] = useState<string[]>([])
   const [inlineTrackId, setInlineTrackId] = useState<string | null>(null)
   const [photoPreview, setPhotoPreview] = useState<{ src: string; alt: string } | null>(null)
   const photoReturnFocusRef = useRef<HTMLElement | null>(null)
@@ -180,8 +180,6 @@ export default function Page() {
 
   const [activeTrack, setActiveTrack] = useState<Track>(tracks[0])
   const [selectedAlbum, setSelectedAlbum] = useState<string | null>(null)
-  const [showAllArtists, setShowAllArtists] = useState(false)
-  const uniqueArtists = Array.from(new Set(tracks.map(track => track.artist)))
 
   const [merchList, setMerchList] = useState<Merchandise[]>([
     {
@@ -232,13 +230,6 @@ export default function Page() {
   const [activeQR, setActiveQR] = useState<{ code: string; title: string; brand: string } | null>(null)
 
   useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem('jakcloth-follow-demo') || '[]')
-      if (Array.isArray(saved)) setFollowedArtists(saved.filter((name): name is string => typeof name === 'string'))
-    } catch {}
-  }, [])
-
-  useEffect(() => {
     if (!inlineTrackId) return
     // Playback is requested by tapping a track, but can be blocked by browser settings.
     void inlineAudioRef.current?.play().catch(() => {})
@@ -284,14 +275,6 @@ export default function Page() {
     setInlineTrackId(previous => previous === trackId ? null : trackId)
   }
 
-  function toggleFollow(artist: string) {
-    setFollowedArtists((previous) => {
-      const next = previous.includes(artist) ? previous.filter((name) => name !== artist) : [...previous, artist]
-      try { localStorage.setItem('jakcloth-follow-demo', JSON.stringify(next)) } catch {}
-      return next
-    })
-  }
-
   const handleQrisSuccess = () => {
     if (selectedPaymentItem?.flexible && (!Number.isSafeInteger(supportAmount) || supportAmount < 10000 || supportAmount > 10000000)) return
     setShowQrisModal(false)
@@ -333,7 +316,7 @@ export default function Page() {
       </header>
 
       <nav aria-label="Navigasi JakCloth" className="max-w-4xl mx-auto px-4 pt-3 flex gap-2 overflow-x-auto text-sm">
-        {[['#live','Live'],['#music','Kompilasi'],['/fan-choice','Fan Choice'],['#tickets','Tiket'],['#merch','Merch'],['#artists','Artis Favorit']].map(([href,label]) =>
+        {[['#live','Live'],['#music','Kompilasi'],['#fan-choice','Fan Choice'],['#tickets','Tiket'],['#merch','Merch']].map(([href,label]) =>
           <a key={href} href={href} className="shrink-0 rounded-full border border-neutral-700 bg-neutral-900 px-3 py-2 text-neutral-200 hover:border-red-500">{label}</a>)}
       </nav>
       <main className="max-w-4xl mx-auto px-4 mt-5 space-y-8">
@@ -537,6 +520,8 @@ export default function Page() {
           )}
         </section>
 
+        <FanChoice />
+
         <section id="tickets" className="bg-neutral-900 border border-neutral-800 rounded-xl p-5 scroll-mt-24">
           <p className="text-xs font-semibold uppercase tracking-widest text-red-500">Events & Tickets</p>
           <h2 className="text-xl font-bold text-white mt-1">Tiket Event JakCloth</h2>
@@ -634,26 +619,7 @@ export default function Page() {
           )}
         </section>
 
-        <section id="artists" className="bg-neutral-900 border border-neutral-800 rounded-xl p-5 scroll-mt-24">
-          <h3 className="text-lg font-bold text-white">Artis Favorit</h3>
-          <p className="mt-1 text-sm text-neutral-400">Ikuti artis favoritmu untuk menemukannya kembali. Pilihan tersimpan di browser perangkat ini.</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4">
-            {(showAllArtists ? uniqueArtists : uniqueArtists.slice(0, 5)).map(artist => (
-              <div key={artist} className="flex items-center justify-between gap-2 rounded-lg bg-neutral-950 border border-neutral-800 p-3">
-                <span className="text-sm text-neutral-100 truncate">{artist}</span>
-                <button type="button" aria-pressed={followedArtists.includes(artist)} onClick={() => toggleFollow(artist)} className={(followedArtists.includes(artist) ? 'bg-neutral-700' : 'bg-red-600 hover:bg-red-700') + ' shrink-0 rounded px-3 py-2 text-xs font-bold text-white'}>
-                  {followedArtists.includes(artist) ? 'Mengikuti' : '+ Ikuti'}
-                </button>
-              </div>
-            ))}
-          </div>
-          {uniqueArtists.length > 5 && (
-            <button type="button" aria-expanded={showAllArtists} onClick={() => setShowAllArtists(previous => !previous)} className="mt-4 w-full rounded-lg border border-neutral-700 px-4 py-3 text-sm font-semibold text-white hover:border-red-500">
-              {showAllArtists ? 'Tampilkan lebih sedikit' : `Lihat semua ${uniqueArtists.length} artis`}
-            </button>
-          )}
-          {followedArtists.length > 0 && <p className="mt-3 text-xs text-neutral-400">{followedArtists.length} artis diikuti di perangkat ini.</p>}
-        </section>
+
       </main>
 
       {photoPreview && (
